@@ -1,0 +1,30 @@
+{
+  "name": "nocode-backend",
+  "version": "0.0.1",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "next": "^13.5.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-results": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/node": "^20.6.3",
+    "@types/react": "^18",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.36.0",
+    "eslint-config-next": "^13.2.4",
+    "postcss": "^8.4.30",
+    "react-refresh": "0.14.0",
+    "tailwindcss": "^3.3.3",
+    "typescript": "latest"
+  },
+  "module": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  }
+}
