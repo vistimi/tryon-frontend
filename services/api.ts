@@ -1,16 +1,18 @@
 import { Ok, Err, Result } from 'ts-results';
 
+const unavailable = 'api server not available: turned off for costs reasons, precomputed results will be used instead of inference'
 export class Api {
 
     public static host = process.env.NEXT_PUBLIC_API_URL;
 
     constructor() {
-        if (!Api.host) throw new Error('NEXT_PUBLIC_API_URL in env not defined');
-        // this.handleRequest('/healthz', { method: 'GET' }).then(res => {
-        //     if (!res.ok) {
-        //         throw new Error(`api server not responding: ${res.val}`)
-        //     }
-        // })
+        if (!Api.host) throw new Error('NEXT_PUBLIC_API_URL in env not defined')
+        if (Api.host == 'down') alert(unavailable)
+        this.handleRequest('/ping', { method: 'GET' }).then(res => {
+            if (!res.ok) {
+                alert(`api server not responding: ${res.val}`)
+            }
+        })
     }
 
     /** Functions general */
@@ -27,13 +29,18 @@ export class Api {
     //     return Ok(await response.json<T>())
     // }
 
-    private handleRequest = async (path: string, requestOptions: FetchRequestInit): Promise<Result<any, string>> => {
-        const res = await fetch(`${Api.host}${path}`, requestOptions);
-        if (!res) return Err('no response')
-        const responseObject = await res.json<any>()
-        if (!responseObject) return Err('empty response')
-        if (responseObject.status >= 300) return Err(`status: ${responseObject.status}, message: ${JSON.stringify(await responseObject, null, 2)}`)
-        return Ok(responseObject)
+    private handleRequest = async (path: string, requestOptions: RequestInit): Promise<Result<any, string>> => {
+        try {
+            const res = await fetch(`${Api.host}${path}`, requestOptions);
+            if (!res) return Err('no response')
+            const responseObject = await res.json()
+            if (!responseObject) return Err('empty response')
+            if (responseObject.status >= 300) return Err(`status: ${responseObject.status}, message: ${JSON.stringify(await responseObject, null, 2)}`)
+            return Ok(responseObject)
+        } catch (error: any) {
+            return Err(error.message)
+        }
+
     }
 
     private get = async (path: string, body: string): Promise<Result<any, string>> => {
@@ -70,7 +77,7 @@ export class Api {
         return this.handleRequest(path, requestOptions)
     }
 
-    public aiCompletion = async (prompt: string): Promise<Result<{ code?: string, error?: string }, string>> => {
-        return await this.put(`/ai/completion`, prompt)
+    public prediction = async (model_id: string, cloth_id: string): Promise<Result<{ content?: string, error?: string }, string>> => {
+        return await this.post(`/prediciton`, JSON.stringify({ model_id, cloth_id }))
     };
 }

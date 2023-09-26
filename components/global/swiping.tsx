@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Dispatch, MouseEvent, SetStateAction, createContext, useContext, useState } from "react"
+import { Dispatch, MouseEvent, SetStateAction, createContext, useContext } from "react"
 
 // context used to store the current image or cloth
 export type SwipingContextState = {
@@ -51,12 +51,14 @@ export const Swiping = (props: SwipingProps): JSX.Element => {
             </svg>
 
             <Image
-                className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover"
+                className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover rounded-xl shadow-md flex space-x-1"
                 src={`/dataset/${props.imageType}/${fileNames[props.imageType][state.idx]}.jpg`}
                 alt={props.imageType == 'image' ? 'Model' : 'Cloth'}
                 width={0}
                 height={0}
                 sizes="100vw"
+                quality={50}
+                priority={false}
             />
 
             <svg
