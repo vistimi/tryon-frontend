@@ -1,36 +1,47 @@
 import Image from "next/image";
-import { MouseEvent, useState } from "react"
+import { Dispatch, MouseEvent, SetStateAction, createContext, useContext, useState } from "react"
+
+// context used to store the current image or cloth
+export type SwipingContextState = {
+    idx: number
+    id: string
+}
+export const SwipingContext = createContext<{
+    state: SwipingContextState,
+    setState: Dispatch<SetStateAction<SwipingContextState>>
+}>({ state: { idx: -1, id: '' }, setState: () => { } });
+
 
 interface SwipingProps {
     imageType: 'image' | 'cloth'
 }
 
 export const Swiping = (props: SwipingProps): JSX.Element => {
-    const [imageIdx, setImageIdx] = useState(0)
+    const { state, setState } = useContext(SwipingContext);
+
     const fileNames = {
         'image': ["00891_00", "03615_00", "07445_00", "07573_00", "08909_00", "10549_00"],
         'cloth': ["01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00", "11351_00", "11791_00"],
     }
 
     const swipeLeft = (event: MouseEvent<SVGSVGElement>) => {
-        if (imageIdx == 0) {
-            setImageIdx(fileNames[props.imageType].length - 1)
+        if (state.idx == 0) {
+            setState({ idx: fileNames[props.imageType].length - 1, id: fileNames[props.imageType][fileNames[props.imageType].length - 1] })
         } else {
-            setImageIdx(imageIdx - 1)
+            setState({ idx: state.idx - 1, id: fileNames[props.imageType][state.idx - 1] })
         }
     }
 
     const swipeRight = (event: MouseEvent<SVGSVGElement>) => {
-        if (imageIdx == fileNames[props.imageType].length - 1) {
-            setImageIdx(0)
-            console.log(0)
+        if (state.idx == fileNames[props.imageType].length - 1) {
+            setState({ idx: 0, id: fileNames[props.imageType][0] })
         } else {
-            setImageIdx(imageIdx + 1)
+            setState({ idx: state.idx + 1, id: fileNames[props.imageType][state.idx + 1] })
         }
     }
 
     return (
-        <div className="grid grid-cols-10" >
+        <div className="p-6 grid grid-cols-10" >
             <svg
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                 className="z-10 row-span-full col-start-1 col-end-2 self-center w-8 h-8 transition-transform transform hover:scale-110"
@@ -41,7 +52,7 @@ export const Swiping = (props: SwipingProps): JSX.Element => {
 
             <Image
                 className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover"
-                src={`/dataset/${props.imageType}/${fileNames[props.imageType][imageIdx]}.jpg`}
+                src={`/dataset/${props.imageType}/${fileNames[props.imageType][state.idx]}.jpg`}
                 alt={props.imageType == 'image' ? 'Model' : 'Cloth'}
                 width={0}
                 height={0}
