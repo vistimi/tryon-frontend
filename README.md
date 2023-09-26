@@ -1,4 +1,4 @@
-# Nocode frontend
+# Tryon frontend
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with Bun.
 

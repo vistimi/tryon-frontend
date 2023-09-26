@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    // "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
@@ -14,12 +15,19 @@
     "esModuleInterop": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    // "module": "esnext",
+    // "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     // "types": [
     //   "bun-types"
     // ],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
       "@pages/*": [
@@ -47,6 +55,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

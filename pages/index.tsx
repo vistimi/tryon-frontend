@@ -1,49 +1,36 @@
 import React from "react";
 import Head from "next/head";
+import Image from 'next/image'
+import { Swiping } from '@components/global/swiping'
 
 export default function Home() {
   return (
-    <div>
+    <div className="flex min-h-screen flex-col items-center justify-between p-24">
       <Head>
-        <title>Cool Title</title>
-        <meta name="description" content="Checkout our cool page" key="desc" />
-        <meta property="og:title" content="Social Title for Cool Page" />
+        <title>Try-on</title>
+        <meta name="description" content="Checkout our try-on" key="desc" />
+        <meta property="og:title" content="Try-on" />
         <meta
           property="og:description"
-          content="And a social description for our cool page"
+          content="Try-on clothes fashion shopping with swiping mechanism"
         />
         {/* <meta property="og:image" content="https://example.com/images/cool-page.jpg" /> */}
       </Head>
-    </div>
+
+      <div className="p-6 max-w-sm mx-auto bg-white rounded-xl shadow-md flex items-center space-x-1">
+        <div className="grid grid-cols-2 gap-4">
+          <Swiping imageType='image' />
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <div className="text-xl font-medium text-black">ChitChat</div>
+              <p className="text-gray-500">You have a new message!</p>
+            </div>
+
+            <Swiping imageType='cloth' />
+
+          </div>
+        </div>
+      </div>
+    </div >
   );
 }
-
-
-{/* <div class="container">
-  <img src="https://www.example.com/image.jpg" alt="Product Image" />
-  <h1>Product Name</h1>
-  <p>Product description goes here.</p>
-  <a href="#" class="btn btn-primary">Add to Cart</a>
-</div>
-The CSS code for this page would be:
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f2f2f2;
-}
-
-.container img {
-  max-width: 100%;
-  height: auto;
-}
-
-.btn {
-  margin-right: 10px;
-}
-The JavaScript code for this page would be:
-
-const productImage = document.querySelector('img');
-const productName = document.querySelector('h1');
-const productDescription = document.querySelector('p'); */}
