@@ -41,7 +41,7 @@ export const Swiping = (props: SwipingProps): JSX.Element => {
     }
 
     return (
-        <div className="p-6 grid grid-cols-10" >
+        <div className="p-2 grid grid-cols-10" >
             <svg
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                 className="z-10 row-span-full col-start-1 col-end-2 self-center w-8 h-8 transition-transform transform hover:scale-110"

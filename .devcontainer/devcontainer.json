@@ -11,6 +11,10 @@
 	},
 	// devcontainer.env must exist
 	"runArgs": [
+		"--net",
+		"tryon-net",
+		"--name",
+		"tryon-frontend",
 		"--env-file",
 		".devcontainer/devcontainer.env"
 	],
