@@ -103,15 +103,15 @@ export const Swiping = function Swiping(props: SwipingProps) {
     return (
         <div className="p-2 grid grid-cols-1" >
             <div className="p-2 grid grid-cols-10" >
-                {loading ? <div className="z-10 row-span-full col-start-1 col-end-2 self-center">
-                    <LoadingWheel />
-                </div> : <svg
+                {loading ? <></> : <svg
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                     className="z-10 row-span-full col-start-1 col-end-2 self-center w-8 h-8 transition-transform transform hover:scale-110"
                     onClick={swipeLeft}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>}
+
+                {loading ? <div className="z-10 row-span-full col-start-5 col-end-6 self-center"><LoadingWheel /></div> : <></>}
 
                 <Image
                     className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover rounded-xl shadow-md flex space-x-1"
@@ -124,9 +124,7 @@ export const Swiping = function Swiping(props: SwipingProps) {
                     priority={false}
                 />
 
-                {loading ? <div className="z-10 row-span-full col-start-10 col-end-11 self-center">
-                    <LoadingWheel />
-                </div> : <svg
+                {loading ? <></> : <svg
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                     className="z-10 row-span-full col-start-10 col-end-11 self-center w-8 h-8 transition-transform transform hover:scale-110"
                     onClick={swipeRight}
@@ -134,6 +132,8 @@ export const Swiping = function Swiping(props: SwipingProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>}
             </div >
+
+            <text className="text-center">{`Please select the ${props.imageType}`}</text>
 
             <div className="p-2 grid grid-cols-3" >
                 <Image

@@ -62,6 +62,7 @@ export default function Index() {
                   quality={75}
                   priority={false}
                 />}
+                {/* <text className="text-center">Generated result</text> */}
               </div>
             </div>
           </div>
