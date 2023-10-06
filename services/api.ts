@@ -1,8 +1,12 @@
 import { Ok, Err, Result } from 'ts-results';
+import { env } from 'next-runtime-env';
+
+
+console.log(env('NEXT_PUBLIC_API_URL'))
 
 export class Api {
 
-    public static host = process.env.NEXT_PUBLIC_API_URL;
+    public static host = env('NEXT_PUBLIC_API_URL')
 
     constructor() {
         if (!Api.host) throw new Error('NEXT_PUBLIC_API_URL in env not defined')
@@ -17,17 +21,9 @@ export class Api {
         return Api.host;
     }
 
-    // public static async fetch<T>(url: string, options: any): Promise<Result<T, string>> {
-    //     const response = await fetch(url, options)
-    //     if (!response.ok) {
-    //         return Err(response.statusText)
-    //     }
-    //     return Ok(await response.json<T>())
-    // }
-
     private handleRequest = async (path: string, requestOptions: RequestInit): Promise<Result<any, string>> => {
         try {
-            const res = await fetch(`${Api.host}${path}`, requestOptions);
+            const res = await fetch(`${Api.host}${path}`, { ...requestOptions, cache: 'force-cache' });
             if (!res) return Err('no response')
             const responseObject = await res.json()
             if (!responseObject) return Err('empty response')

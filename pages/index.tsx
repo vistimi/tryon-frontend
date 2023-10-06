@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import Head from "next/head"
 import { LoadingContext, LoadingContextState, ResultContext, ResultContextState, Swiping, SwipingContext, SwipingContextState } from '@components/global/swiping'
 import Image from "next/image"
@@ -62,7 +62,6 @@ export default function Index() {
                   quality={75}
                   priority={false}
                 />}
-                {/* <text className="text-center">Generated result</text> */}
               </div>
             </div>
           </div>
