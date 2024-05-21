@@ -97,6 +97,10 @@ inputs = {
     prefix = local.domain_prefix
   }
 
+  vpc = {
+    cidr_ipv4 = "1.0.0.0/16"
+  }
+
   microservice = {
     bucket_env = {
       content = <<EOT
