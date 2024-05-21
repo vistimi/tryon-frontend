@@ -1,0 +1,34 @@
+import { Api } from "@/services/api"
+import { loadCloth } from "../load";
+
+export interface ParserClothPostBody {
+    idx: string
+}
+
+export interface ParserClothPostResponse {
+    image: Uint8Array;
+}
+
+export async function POST(request: Request) {
+    let json: ParserClothPostBody;
+    const api = new Api();
+    switch (request.headers.get('Content-Type')) {
+        case 'application/json':
+            json = await request.json();
+            break;
+        default:
+            return new Response('Unsupported Media Type', { status: 415 });
+    }
+
+    const cloth = await loadCloth(json.idx)
+    const result = await api.parserCloth(cloth);
+    if (result.isErr()) {
+        console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
+        return Response.json({
+            message: 'Bad Request',
+            error: result.unwrapErr(),
+        }, { status: 400 })
+    }
+    const body: ParserClothPostResponse = result.unwrap()
+    return Response.json(body, { status: 200 });
+}

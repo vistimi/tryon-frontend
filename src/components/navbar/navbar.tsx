@@ -11,9 +11,7 @@ import {
 } 
 from "@nextui-org/navbar";
 import { Link } from "@nextui-org/react";
-import { link as linkStyles } from "@nextui-org/theme";
 import { siteConfig } from "@/config/site";
-import clsx from "clsx";
 import { ThemeSwitch } from "@/components/navbar/themeSwitcher";
 import { Logo } from "@/components/navbar/logo";
 
@@ -43,11 +41,7 @@ export const NavbarWeb = () => {
 					{siteConfig.navBarItems.map((item) => (
 						<NavbarItem key={item.href}>
 							<Link
-								className={clsx(
-									linkStyles({ color: "foreground" }),
-									"data-[active=true]:text-primary data-[active=true]:font-medium"
-								)}
-								color="foreground"
+								className="data-[active=true]:text-primary data-[active=true]:font-medium text-default-foreground"
 								href={item.href}
 							>
 								{item.label}

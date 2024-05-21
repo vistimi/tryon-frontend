@@ -1,16 +1,22 @@
 'use client'
 
 import { useState } from "react";
-import Head from "next/head"
-import { LoadingContext, LoadingContextState, ResultContext, ResultContextState, Swiping, SwipingContext, SwipingContextState } from '@/components/swiping'
 import Image from "next/image"
-import { Api } from "@/services/api"
+import { SwipingHuman } from "./swipingHuman";
+import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
+import { LoadingContext, LoadingContextState } from "@/components/context/loading";
+import { ImageContext, ImageContextClothParser, ImageContextGenerative, ImageContextHumanParser, ImageContextOpenpose } from "@/components/context/image";
+import { SwipingCloth } from "./swipingCloth";
+import { Swiping } from "@/components/swiping";
 
 export default function Home() {
-	const api = new Api()
 	const [swiping, setSwiping] = useState<SwipingContextState>({ idxImage: 0, idxCloth: 0 })
 	const [loading, setLoading] = useState<LoadingContextState>(false)
-	const [result, setResult] = useState<ResultContextState>('')
+	const [openposeLabel, setOpenposeLabel] = useState<any>(null)
+	const [openpose, setOpenpose] = useState<ImageContextOpenpose>(null)
+	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>(null)
+	const [clothParser, setClothParser] = useState<ImageContextClothParser>(null)
+	const [generative, setGenerative] = useState<ImageContextGenerative>(null)
 
 	return (
 		<section className="flex flex-col gap-6 py-8 md:py-10">
@@ -26,27 +32,49 @@ export default function Home() {
 					<meta property="og:image" content="https://example.com/images/cool-page.jpg" />
 				</Head> */}
 
-				<div className="align-middle p-0 max-w-screen-2xl bg-white rounded-xl shadow-md items-center space-x-1 grid grid-flow-col-dense grid-cols-6">
-						<ResultContext.Provider value={{ result, setResult }}>
+				<div className="align-middle p-0 max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center space-x-1 grid grid-flow-col-dense grid-cols-6">
+						<ImageContext.Provider 
+							value={{
+								openposeLabel, setOpenposeLabel,
+								openpose, setOpenpose,								
+								humanParser, setHumanParser,
+								clothParser, setClothParser,
+								generative, setGenerative
+							}}
+						>
 							<LoadingContext.Provider value={{ loading, setLoading }}>
 								<SwipingContext.Provider value={{ swiping, setSwiping }}>
 									<div className="col-span-2">
-									<Swiping imageType='image' api={api} />
+										<SwipingHuman />
 									</div>
 
 									<div className="col-span-2">
-									<Swiping imageType='cloth' api={api} />
+										<SwipingCloth />
+									</div>
+
+									<div className="col-span-2">
+										<Swiping
+											alt="result"
+											imageSrc={generative ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}` : ''}
+											imageSrcs={[
+												openpose ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(openpose)))}` : '',
+												humanParser ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(humanParser)))}` : '',
+												clothParser ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(clothParser)))}` : '',
+											]}
+											loading={loading}
+										/>
 									</div>
 								</SwipingContext.Provider>
 							</LoadingContext.Provider>
-						</ResultContext.Provider>
+						</ImageContext.Provider>
 
-						<div className="col-span-2">
+						{/* <div className="col-span-2">
 							<div className="p-2 grid grid-cols-1">
 							<div className="p-2 items-center">
-								{result != '' && <Image
+								{generative && <Image
 								className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover rounded-xl shadow-md flex space-x-1"
-								src={`data:image/png;base64,${result}`}
+								src={`data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}`}
+								// btoa(String.fromCharCode(...generative))
 								alt={'AI Generated'}
 								width={0}
 								height={0}
@@ -56,7 +84,7 @@ export default function Home() {
 								/>}
 							</div>
 							</div>
-						</div>
+						</div> */}
 				</div>
 			</div >
 		</section>

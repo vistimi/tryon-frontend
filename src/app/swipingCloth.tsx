@@ -1,0 +1,127 @@
+import { MouseEvent, useContext } from "react"
+import { Api } from "@/services/api";
+import { Swiping } from "@/components/swiping";
+import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
+import { LoadingContext } from "@/components/context/loading";
+import { ImageContext } from "@/components/context/image";
+import { ParserClothPostBody, ParserClothPostResponse } from "./api/parserCloth/route";
+import { GenerativePostBody, GenerativePostResponse } from "./api/generative/route";
+
+interface SwipingClothProps {}
+
+export const SwipingCloth = ({}: SwipingClothProps) => {
+    const { swiping, setSwiping } = useContext(SwipingContext);
+    const { loading, setLoading } = useContext(LoadingContext);
+    const {
+        openpose,
+        openposeLabel,
+        setClothParser,
+        humanParser,
+        setGenerative
+    } = useContext(ImageContext);
+    const imageType = 'cloth'
+
+    const swipe = async (swiping: SwipingContextState) => {
+        setLoading(true)
+        const clothIdx = fileNames['cloth'][swiping.idxCloth]
+        const humanIdx = fileNames['human'][swiping.idxImage]
+
+        let clothParser : Uint8Array | null = null
+        // const resultParserCloth = await api.parserHuman(image)
+        // if (resultParserCloth.isOk()) {
+        //     const image = resultParserCloth.unwrap().image
+        //     clothParser = image
+        //     setClothParser(image)
+        // } else{
+        //     console.error('resultParserCloth', resultParserCloth.unwrapErr())
+        //     setClothParser(null)
+        // }
+        const bodyParserCloth: ParserClothPostBody = { idx: clothIdx }
+        const resultParserCloth = await fetch('/api/parserCloth', { method: 'POST', body: JSON.stringify(bodyParserCloth), headers: {'Content-Type': 'application/json' }});
+        if (resultParserCloth.ok) {
+            const { image }: ParserClothPostResponse = await resultParserCloth.json()
+            clothParser = image
+            setClothParser(image)
+        } else {
+            console.error('resultParserCloth', await resultParserCloth.text())
+            setClothParser(null)
+        }
+
+        if (openpose == null || openposeLabel == null || humanParser == null || clothParser == null) {
+            setLoading(false)
+            return
+        }
+
+        // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothParserImage)
+        // if (resultGenerative.isOk()) {
+        //     setGenerative(resultGenerative.unwrap().image)
+        // } else{
+        //     console.error('resultGenerative', resultGenerative.unwrapErr())
+        //     setGenerative(null)
+        // }
+        const bodyGenerative: GenerativePostBody = {
+            pose_rgb: openpose,
+            pose_label: openposeLabel,
+            human_idx: humanIdx,
+            human_parse: humanParser,
+            cloth_idx: clothIdx,
+            cloth_mask: clothParser,
+        }
+        const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
+        if (resultGenerative.ok) {
+            const { image }: GenerativePostResponse = await resultGenerative.json()
+            setGenerative(image)
+        } else {
+            console.error('resultGenerative', await resultGenerative.text())
+            setGenerative(null)
+        }
+        
+        setLoading(false)
+        return
+    }
+    
+    const fileNames = {
+        'human': ["00891_00", "03615_00", "07445_00", "07573_00", "08909_00", "10549_00"],
+        'cloth': ["01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00", "11351_00", "11791_00"],
+    }
+
+    const swipeLeft = (event: MouseEvent<SVGSVGElement>) => {
+        const swipingNew = { ...swiping, idxCloth: getIdx(swiping.idxCloth - 1) }
+        swipe(swipingNew)
+        setSwiping(swipingNew)
+    }
+
+    const swipeRight = (event: MouseEvent<SVGSVGElement>) => {
+        const swipingNew = { ...swiping, idxImage: getIdx(swiping.idxImage + 1) }
+        swipe(swipingNew)
+        setSwiping(swipingNew)
+    }
+
+    const getIdx = (idx: number) => {
+        if (idx > fileNames[imageType].length - 1) {
+            idx = idx - fileNames[imageType].length
+        } else if (idx < 0) {
+            idx = fileNames[imageType].length + idx
+        }
+        return idx
+    }
+
+    const getId = (increment: number = 0) => {
+        return fileNames[imageType][getIdx(swiping.idxCloth + increment)]
+    }
+
+    return (
+        <Swiping
+            alt={imageType}
+            imageSrc={`/dataset/${imageType}/${getId()}.jpg`}
+            imageSrcs={[
+                `/dataset/${imageType}/${getId(-1)}.jpg`,
+                `/dataset/${imageType}/${getId()}.jpg`,
+                `/dataset/${imageType}/${getId(1)}.jpg`,
+            ]}
+            loading={loading}
+            swipeLeft={swipeLeft}
+            swipeRight={swipeRight}
+        />
+    );
+}

@@ -1,5 +1,5 @@
-output "next_serverless" {
-  value = module.next_serverless
+output "microservice" {
+  value = module.microservice
 }
 
 output "route53" {

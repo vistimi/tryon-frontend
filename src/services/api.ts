@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import { Ok, Err, Result } from 'ts-results-es';
 
@@ -93,6 +93,10 @@ export class Api {
             headers,
             body: JSON.stringify(body)
         }
+
+        const Req = new Blob([JSON.stringify(body)]).size / (1024 * 1024);
+        console.log(`Req size: ${Req} MB`);
+        
         queryParams = Object.entries(queryParams || {}).reduce((acc, [key, value]) => {
             if (!!value) {
                 acc[key] = value;
@@ -102,7 +106,7 @@ export class Api {
         const queryString = new URLSearchParams(queryParams).toString();
         if (queryString) {
             path += '?' + queryString
-        }
+        }        
         return this.handleRequest(path, requestOptions)
     }
 
@@ -186,7 +190,33 @@ export class Api {
     };
 
     /** AI */
-    public prediction = async (model_id: string, cloth_id: string): Promise<Result<number[], string>> => {
-        return await this.post(`/prediction`, JSON.stringify({ model_name: model_id, cloth_name: cloth_id }))
+    public parserHuman = async (image: Uint8Array): Promise<Result<{image: Uint8Array}, string>> => {
+        return await this.post(`/parser-human`, undefined, undefined, { image: image })
+    };
+
+    public parserCloth = async (image: Uint8Array): Promise<Result<{image: Uint8Array}, string>> => {
+        return await this.post(`/parser-cloth`, undefined, undefined, { image: image })
+    };
+
+    public openpose = async (image: Uint8Array): Promise<Result<{image: Uint8Array, label: any}, string>> => {
+        return await this.post(`/openpose`, undefined, undefined, { image: image })
+    };
+
+    public generative = async (
+        pose_rgb: Uint8Array,
+        pose_label: Uint8Array,
+        human_rgb: Uint8Array,
+        human_parse: Uint8Array,
+        cloth_rgb: Uint8Array,
+        cloth_mask: Uint8Array,
+    ): Promise<Result<{image: Uint8Array}, string>> => {
+        return await this.post(`/generative`, undefined, undefined, { 
+            pose_rgb,
+            pose_label,
+            human_rgb,
+            human_parse,
+            cloth_rgb,
+            cloth_mask,
+        })
     };
 }

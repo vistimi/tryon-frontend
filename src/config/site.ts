@@ -4,27 +4,18 @@ export const siteConfig = {
 	name: "Vistimi",
 	description: "Vistimi is a virtual try-on clothes for fashion shopping.",
 	navBarItems: [
-		// {
-		// 	label: "Sailing Pilot Study",
-		// 	href: "/study/carib600_2024",
-		// },
+		{
+			label: "Info",
+			href: "/info",
+		},
 	],
 	navMenuItems: [
-		// {
-		// 	label: "Sailing Pilot Study",
-		// 	href: "/study/carib600_2024",
-		// },
+		{
+			label: "Info",
+			href: "/info",
+		},
 	],
-	avatarItems: [		
-		// {
-		// 	label: "Account",
-		// 	href: "/account",
-		// },
-		// {
-		// 	label: "Logout",
-		// 	href: "/logout",
-		// },
-	],
+	avatarItems: [],
 	links: {
 		// github: "https://github.com/nextui-org/nextui",
 		// twitter: "https://twitter.com/getnextui",
