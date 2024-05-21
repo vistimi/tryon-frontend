@@ -1,0 +1,94 @@
+'use client'
+
+import {
+	Navbar as NextUINavbar,
+	NavbarContent,
+	NavbarMenu,
+	NavbarMenuToggle,
+	NavbarBrand,
+	NavbarItem,
+	NavbarMenuItem,
+} 
+from "@nextui-org/navbar";
+import { Link } from "@nextui-org/react";
+import { link as linkStyles } from "@nextui-org/theme";
+import { siteConfig } from "@/config/site";
+import clsx from "clsx";
+import { ThemeSwitch } from "@/components/navbar/themeSwitcher";
+import { Logo } from "@/components/navbar/logo";
+
+export const NavbarWeb = () => {
+
+	return (
+		<NextUINavbar maxWidth='full' position="sticky" className="sm:px-14">
+
+			<NavbarContent justify="start">
+				<NavbarBrand as="li" className="gap-3">
+
+					{/* {Logo} */}
+					<Link
+						className="flex justify-start items-center w-32"
+						href="/"
+					>
+						<Logo/>
+						<p
+							className="pl-4 data-[active=true]:text-inherit data-[active=true]:font-bold text-xl tracking-tight font-semibold text-default-foreground"
+						>
+							{siteConfig.name}
+						</p>
+					</Link>
+
+					{/* {Menu website} */}
+					<ul className="hidden lg:flex gap-5 ml-5">
+					{siteConfig.navBarItems.map((item) => (
+						<NavbarItem key={item.href}>
+							<Link
+								className={clsx(
+									linkStyles({ color: "foreground" }),
+									"data-[active=true]:text-primary data-[active=true]:font-medium"
+								)}
+								color="foreground"
+								href={item.href}
+							>
+								{item.label}
+							</Link>
+						</NavbarItem>
+					))}
+				</ul>
+				<NavbarMenuToggle className="flex lg:hidden h-10 w-min"/>
+				
+				</NavbarBrand>
+			</NavbarContent>
+
+
+			<NavbarContent
+				className="gap-2 "
+				justify="end"
+			>
+
+				{/* {Darkmode button} */}
+				<NavbarItem className="flex gap-2">
+					<ThemeSwitch />
+				</NavbarItem>
+
+			</NavbarContent>
+
+
+			<NavbarMenu>
+				<div className="mx-4 mt-2 flex-col gap-2">
+					{siteConfig.navMenuItems.map((item, index) => (
+						<NavbarMenuItem key={`${item}-${index}`}>
+							<Link
+								color="primary"
+								href={item.href}
+								size="lg"
+							>
+								{item.label}
+							</Link>
+						</NavbarMenuItem>
+					))}
+				</div>
+			</NavbarMenu>
+		</NextUINavbar>
+	);
+};
