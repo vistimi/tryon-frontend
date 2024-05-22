@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "longlived" {
+  description = "If the bucket should be long lived"
+  type        = bool
+  default     = false
+}
+
 variable "domain" {
   type = object({
     zone   = string

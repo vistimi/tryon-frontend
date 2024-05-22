@@ -43,7 +43,7 @@ generate "provider" {
 # Main region where the resources should be created in
 # Should be close to the location of your viewers
 provider "aws" {
-  region = "${local.convention_vars.locals.account_region_name}"
+  region = "${local.account_region_name}"
   # Make it faster by skipping something
   # skip_metadata_api_check     = true
   # skip_region_validation      = true
@@ -65,11 +65,11 @@ remote_state {
     encrypt = true
     # key                 = "${path_relative_to_include()}/terraform.tfstate"
     key                 = "terraform.tfstate"
-    region              = local.convention_vars.locals.account_region_name
-    bucket              = lower(join("-", compact([local.convention_vars.locals.name, "tf-state"])))
-    dynamodb_table      = lower(join("-", compact([local.convention_vars.locals.name, "tf-locks"])))
-    s3_bucket_tags      = local.convention_vars.locals.tags
-    dynamodb_table_tags = local.convention_vars.locals.tags
+    region              = local.account_region_name
+    bucket              = lower(join("-", compact([local.name, "tf-state"])))
+    dynamodb_table      = lower(join("-", compact([local.name, "tf-locks"])))
+    s3_bucket_tags      = local.tags
+    dynamodb_table_tags = local.tags
   }
 
   generate = {
@@ -89,8 +89,10 @@ terraform {
 }
 
 inputs = {
-  name     = local.convention_vars.locals.name
+  name     = local.name
   base_dir = "${local.root_path}/"
+
+  longlived = local.longlived
 
   domain = {
     zone   = local.domain_name
@@ -98,13 +100,13 @@ inputs = {
   }
 
   vpc = {
-    cidr_ipv4 = "1.0.0.0/16"
+    cidr_ipv4 = "11.0.0.0/16"
   }
 
   microservice = {
     bucket_env = {
       content = <<EOT
-NEXT_PUBLIC_API_URL=${get_env("NEXT_PUBLIC_API_URL")}
+AI_URL=${get_env("AI_URL")}
 EOT
     }
     orchestrator = {
@@ -123,11 +125,11 @@ EOT
                   lifecycle_policy = jsonencode({
                     rules = [{
                       rulePriority = 1,
-                      description  = "Keep last 30 images",
+                      description  = "Keep last 10 images",
                       selection = {
                         tagStatus   = "any",
                         countType   = "imageCountMoreThan",
-                        countNumber = 30
+                        countNumber = 10
                       },
                       action = {
                         type = "expire"
@@ -137,9 +139,7 @@ EOT
                 }
                 build = {
                   args = {
-                    NEXT_PUBLIC_API_URL                = get_env("NEXT_PUBLIC_API_URL")
-                    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = get_env("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY")
-                    STRIPE_SECRET_KEY                  = get_env("STRIPE_SECRET_KEY")
+                    AI_URL                = get_env("AI_URL")
                   }
                   context_path = local.root_path
                   file_path    = "Dockerfile" # file_path from the context_path
@@ -149,6 +149,14 @@ EOT
               }
 
               traffics = [
+                {
+                  listener = {
+                    protocol = "http"
+                  }
+                  target = {
+                    port              = 3000
+                  }
+                },
                 {
                   listener = {
                     protocol = "https"
@@ -188,8 +196,8 @@ EOT
   }
 
   tags = {
-    Name        = local.convention_vars.locals.name
-    Environment = local.convention_vars.locals.environment
+    Name        = local.name
+    Environment = local.environment
     Terraform   = true
   }
 }

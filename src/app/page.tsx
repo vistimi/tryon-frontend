@@ -19,8 +19,8 @@ export default function Home() {
 	const [generative, setGenerative] = useState<ImageContextGenerative>(null)
 
 	return (
-		<section className="flex flex-col gap-6 py-8 md:py-10">
-			<div className="flex mt-5 items-center">
+		<section className="flex flex-col">
+			<div className="flex items-center">
 				{/* <Head>
 					<title>Try-on</title>
 					<meta name="description" content="Checkout our try-on" key="desc" />
@@ -32,7 +32,7 @@ export default function Home() {
 					<meta property="og:image" content="https://example.com/images/cool-page.jpg" />
 				</Head> */}
 
-				<div className="align-middle p-0 max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center space-x-1 grid grid-flow-col-dense grid-cols-6">
+				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center space-x-1 grid grid-flow-col-dense grid-cols-6">
 						<ImageContext.Provider 
 							value={{
 								openposeLabel, setOpenposeLabel,
@@ -53,7 +53,8 @@ export default function Home() {
 									</div>
 
 									<div className="col-span-2">
-										<Swiping
+										{
+											(generative || openpose || humanParser || clothParser) && <Swiping
 											alt="result"
 											imageSrc={generative ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}` : ''}
 											imageSrcs={[
@@ -63,6 +64,7 @@ export default function Home() {
 											]}
 											loading={loading}
 										/>
+										}
 									</div>
 								</SwipingContext.Provider>
 							</LoadingContext.Provider>

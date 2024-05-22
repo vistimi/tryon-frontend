@@ -5,14 +5,14 @@ export const siteConfig = {
 	description: "Vistimi is a virtual try-on clothes for fashion shopping.",
 	navBarItems: [
 		{
-			label: "Info",
-			href: "/info",
+			label: "Status",
+			href: "/status",
 		},
 	],
 	navMenuItems: [
 		{
-			label: "Info",
-			href: "/info",
+			label: "Status",
+			href: "/status",
 		},
 	],
 	avatarItems: [],

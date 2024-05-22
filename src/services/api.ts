@@ -7,7 +7,7 @@ export class Api {
     public static host: string;
 
     constructor() {
-        const uri = process.env.NEXT_PUBLIC_API_URL
+        const uri = process.env.AI_URL
         if (!uri) {
             throw new Error('Api host is not set')
         }
@@ -191,15 +191,24 @@ export class Api {
 
     /** AI */
     public parserHuman = async (image: Uint8Array): Promise<Result<{image: Uint8Array}, string>> => {
-        return await this.post(`/parser-human`, undefined, undefined, { image: image })
+        return await this.post(`:8082/parser`, undefined, undefined, { image: image })
+    };
+    public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
+        return await this.get(`:8082/ping`, undefined, undefined)
     };
 
     public parserCloth = async (image: Uint8Array): Promise<Result<{image: Uint8Array}, string>> => {
-        return await this.post(`/parser-cloth`, undefined, undefined, { image: image })
+        return await this.post(`:8083/parser`, undefined, undefined, { image: image })
+    };
+    public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
+        return await this.get(`:8083/ping`, undefined, undefined)
     };
 
     public openpose = async (image: Uint8Array): Promise<Result<{image: Uint8Array, label: any}, string>> => {
-        return await this.post(`/openpose`, undefined, undefined, { image: image })
+        return await this.post(`:8081/openpose`, undefined, undefined, { image: image })
+    };
+    public openposePing = async (): Promise<Result<{message: string}, string>> => {
+        return await this.get(`:8081/ping`, undefined, undefined)
     };
 
     public generative = async (
@@ -210,7 +219,7 @@ export class Api {
         cloth_rgb: Uint8Array,
         cloth_mask: Uint8Array,
     ): Promise<Result<{image: Uint8Array}, string>> => {
-        return await this.post(`/generative`, undefined, undefined, { 
+        return await this.post(`:8080/generative`, undefined, undefined, { 
             pose_rgb,
             pose_label,
             human_rgb,
@@ -218,5 +227,8 @@ export class Api {
             cloth_rgb,
             cloth_mask,
         })
+    };
+    public generativePing = async (): Promise<Result<{message: string}, string>> => {
+        return await this.get(`:8080/ping`, undefined, undefined)
     };
 }

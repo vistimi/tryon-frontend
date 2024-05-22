@@ -33,3 +33,16 @@ export async function POST(request: Request) {
     const body: OpenposePostResponse = result.unwrap()
     return Response.json(body, { status: 200 });
 }
+
+export async function GET(request: Request) {
+    const api = new Api();
+    const result = await api.openposePing();
+    if (result.isErr()) {
+        console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
+        return Response.json({
+            message: 'Bad Request',
+            error: result.unwrapErr(),
+        }, { status: 400 })
+    }
+    return Response.json(result.unwrap(), { status: 200 });
+}

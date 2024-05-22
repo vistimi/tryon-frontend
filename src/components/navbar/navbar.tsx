@@ -10,7 +10,7 @@ import {
 	NavbarMenuItem,
 } 
 from "@nextui-org/navbar";
-import { Link } from "@nextui-org/react";
+import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/navbar/themeSwitcher";
 import { Logo } from "@/components/navbar/logo";

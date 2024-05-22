@@ -3,7 +3,7 @@ import sharp from 'sharp';
 const decodeJpeg = async (filePath: string) => {
     // const jpegData = readFileSync(filePath);
     // const { width, height, data } = jpeg.decode(jpegData, { useTArray: true }); // return as Uint8Array
-    const data = sharp(filePath).jpeg({quality: 10}).toBuffer()
+    const data = sharp(filePath).jpeg({quality: 50}).toBuffer()
     return data
 };
 

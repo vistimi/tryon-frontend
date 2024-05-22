@@ -40,11 +40,11 @@ export default function RootLayout({
 		<html lang="en">
 			<head/>
 			<body
-				className="text-foreground bg-background min-h-screen font-sans antialiased max-w"
+				className="text-foreground bg-background min-h-screen font-sans max-w"
 			>
 				<Providers>
 					<NavbarWeb/>
-					<div className="px-5 lg:px-60 py-12">
+					<div className="px-5 lg:px-60 py-6">
 						<main>
 							{children}
 						</main>

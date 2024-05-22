@@ -19,12 +19,12 @@ module "microservice" {
     }
   }
 
-#   bucket_env = {
-#     force_destroy = !var.longlived
-#     versioning    = var.longlived
-#     file_key      = "${random_id.rng.hex}.env"
-#     file_path     = local_file.env.filename
-#   }
+  bucket_env = {
+    force_destroy = !var.longlived
+    versioning    = var.longlived
+    file_key      = "${random_id.rng.hex}.env"
+    file_path     = local_file.env.filename
+  }
 
   orchestrator = var.microservice.orchestrator
 
