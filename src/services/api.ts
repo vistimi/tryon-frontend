@@ -181,17 +181,17 @@ export class Api {
         return this.handleRequest(path, requestOptions)
     }
 
-    /** API Gateway */
-    public ping = async (): Promise<Result<{ message: string }, string>> => {
-        return this.get(`/ping`)
-    };
+    // /** API Gateway */
+    // public ping = async (): Promise<Result<{ message: string }, string>> => {
+    //     return this.get(`/ping`)
+    // };
 
     /** AI */
     public parserHuman = async (image: number[]): Promise<Result<{image: number[]}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8082/parser`, undefined, undefined, { image: image })
+        return await this.post(`:8082/prediction`, undefined, undefined, { image: image })
     };
     public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8082/ping`, undefined, undefined)
@@ -201,7 +201,7 @@ export class Api {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8083/parser`, undefined, undefined, { image: image })
+        return await this.post(`:8083/prediction`, undefined, undefined, { image: image })
     };
     public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8083/ping`, undefined, undefined)
@@ -211,7 +211,7 @@ export class Api {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8081/openpose`, undefined, undefined, { image: image, output_quality: 100 })
+        return await this.post(`:8081/prediction`, undefined, undefined, { image: image, output_quality: 100 })
     };
     public openposePing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8081/ping`, undefined, undefined)
@@ -228,7 +228,7 @@ export class Api {
         // if (!Array.isArray(pose_rgb) || !Array.isArray(pose_label) || !Array.isArray(human_rgb) || !Array.isArray(human_parse) || !Array.isArray(cloth_rgb) || !Array.isArray(cloth_mask)){
         //     return Err(`Image must be a list, pose_rgb ${typeof pose_rgb}, pose_label ${typeof pose_label}, human_rgb ${typeof human_rgb}, human_parse ${typeof human_parse}, cloth_rgb ${typeof cloth_rgb}, cloth_mask ${typeof cloth_mask}`);
         // }
-        return await this.post(`:8080/generative`, undefined, undefined, { 
+        return await this.post(`:8080/prediction`, undefined, undefined, { 
             pose_rgb,
             pose_label,
             human_rgb,
