@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from "react";
-import Image from "next/image"
+import { useEffect, useState } from "react";
 import { SwipingHuman } from "./swipingHuman";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext, LoadingContextState } from "@/components/context/loading";
@@ -10,13 +9,81 @@ import { SwipingCloth } from "./swipingCloth";
 import { Swiping } from "@/components/swiping";
 
 export default function Home() {
-	const [swiping, setSwiping] = useState<SwipingContextState>({ idxImage: 0, idxCloth: 0 })
+	const [swiping, setSwiping] = useState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 })
 	const [loading, setLoading] = useState<LoadingContextState>(false)
 	const [openposeLabel, setOpenposeLabel] = useState<any>(null)
 	const [openpose, setOpenpose] = useState<ImageContextOpenpose>(null)
 	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>(null)
 	const [clothParser, setClothParser] = useState<ImageContextClothParser>(null)
 	const [generative, setGenerative] = useState<ImageContextGenerative>(null)
+
+	const [humanParserScaled, setHumanParserScaled] = useState<null|string>(null)
+	useEffect(() => {
+		if (humanParser) {
+			const canvas = document.createElement('canvas')
+			const ctx = canvas.getContext('2d')
+			if (!ctx || !canvas) return
+			const image = new Image()
+			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(humanParser)))}`
+			image.onload = () => {
+				canvas.width = image.width
+				canvas.height = image.height
+				ctx.drawImage(image, 0, 0, image.width, image.height)
+				let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+				let data = imageData.data
+				let max = 0
+				for (let i = 0; i < data.length; i += 4) {
+					const pixelValue = Math.max(data[i], data[i + 1], data[i + 2])
+					max = Math.max(max, pixelValue)
+				}
+				const scale = 256 / max
+				for (let i = 0; i < data.length; i += 4) {
+					data[i]     = data[i] * scale     // Red channel
+					data[i + 1] = data[i + 1] * scale // Green channel
+					data[i + 2] = data[i + 2] * scale // Blue channel
+				}
+				ctx.putImageData(imageData, 0, 0)
+				// setHumanParserScaled(Array.from(new Uint8Array(data.data)))
+				const base64Image = canvas.toDataURL("image/png");
+				setHumanParserScaled(base64Image)
+				// console.info('base64Image', base64Image.split(",")[1])
+			}
+		}
+	}, [humanParser])
+
+	const [clothParserScaled, setClothParserScaled] = useState<null|string>(null)
+	useEffect(() => {
+		if (clothParser) {
+			const canvas = document.createElement('canvas')
+			const ctx = canvas.getContext('2d')
+			if (!ctx || !canvas) return
+			const image = new Image()
+			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(clothParser)))}`
+			image.onload = () => {
+				canvas.width = image.width
+				canvas.height = image.height
+				ctx.drawImage(image, 0, 0, image.width, image.height)
+				let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+				let data = imageData.data
+				let max = 0
+				for (let i = 0; i < data.length; i += 4) {
+					const pixelValue = Math.max(data[i], data[i + 1], data[i + 2])
+					max = Math.max(max, pixelValue)
+				}
+				const scale = 256 / max
+				for (let i = 0; i < data.length; i += 4) {
+					data[i]     = data[i] * scale     // Red channel
+					data[i + 1] = data[i + 1] * scale // Green channel
+					data[i + 2] = data[i + 2] * scale // Blue channel
+				}
+				ctx.putImageData(imageData, 0, 0)
+				// setClothParserScaled(Array.from(new Uint8Array(data.data)))
+				const base64Image = canvas.toDataURL("image/png");
+				setClothParserScaled(base64Image)
+				// console.info('base64Image', base64Image.split(",")[1])
+			}
+		}
+	}, [clothParser])
 
 	return (
 		<section className="flex flex-col">
@@ -32,7 +99,7 @@ export default function Home() {
 					<meta property="og:image" content="https://example.com/images/cool-page.jpg" />
 				</Head> */}
 
-				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center space-x-1 grid grid-flow-col-dense grid-cols-6">
+				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center flex flex-col md:flex-row">
 						<ImageContext.Provider 
 							value={{
 								openposeLabel, setOpenposeLabel,
@@ -44,49 +111,33 @@ export default function Home() {
 						>
 							<LoadingContext.Provider value={{ loading, setLoading }}>
 								<SwipingContext.Provider value={{ swiping, setSwiping }}>
-									<div className="col-span-2">
+									<div className="max-w-sm text-center">
 										<SwipingHuman />
+										<text>{`Please select the model`}</text>
 									</div>
-
-									<div className="col-span-2">
+									<div className="max-w-sm text-center">										
 										<SwipingCloth />
+										<text>{`Please select the cloth`}</text>
 									</div>
-
-									<div className="col-span-2">
-										{
-											(generative || openpose || humanParser || clothParser) && <Swiping
-											alt="result"
-											imageSrc={generative ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}` : ''}
-											imageSrcs={[
-												openpose ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(openpose)))}` : '',
-												humanParser ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(humanParser)))}` : '',
-												clothParser ? `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(clothParser)))}` : '',
-											]}
-											loading={loading}
-										/>
-										}
-									</div>
+									{
+										(generative || openpose || humanParser || clothParser) && <div className="max-w-sm text-center">
+											<Swiping
+												alt="result"
+												alts={['openpose', 'human-parser', 'cloth-parser']}
+												imageSrc={generative ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}` : ''}
+												imageSrcs={[
+													openpose ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(openpose)))}` : '',
+													humanParserScaled ? humanParserScaled : '',
+													clothParserScaled ? clothParserScaled : '',
+												]}
+												loading={loading}
+											/>
+											<text>{`View the generative AI result`}</text>
+										</div>
+									}
 								</SwipingContext.Provider>
 							</LoadingContext.Provider>
 						</ImageContext.Provider>
-
-						{/* <div className="col-span-2">
-							<div className="p-2 grid grid-cols-1">
-							<div className="p-2 items-center">
-								{generative && <Image
-								className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover rounded-xl shadow-md flex space-x-1"
-								src={`data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}`}
-								// btoa(String.fromCharCode(...generative))
-								alt={'AI Generated'}
-								width={0}
-								height={0}
-								sizes="100vw"
-								quality={75}
-								priority={false}
-								/>}
-							</div>
-							</div>
-						</div> */}
 				</div>
 			</div >
 		</section>

@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction, createContext } from "react";
 
 export type ImageContextOpenposeLabel = any | null
-export type ImageContextOpenpose = Uint8Array | null
-export type ImageContextHumanParser = Uint8Array | null
-export type ImageContextClothParser = Uint8Array | null
-export type ImageContextGenerative = Uint8Array | null
+export type ImageContextOpenpose = number[] | null
+export type ImageContextHumanParser = number[] | null
+export type ImageContextClothParser = number[] | null
+export type ImageContextGenerative = number[] | null
 export const ImageContext = createContext<{
     openposeLabel: ImageContextOpenposeLabel,
     setOpenposeLabel: Dispatch<SetStateAction<ImageContextOpenposeLabel>>

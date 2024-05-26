@@ -2,11 +2,11 @@ import { Api } from "@/services/api"
 import { loadCloth } from "../load";
 
 export interface ParserClothPostBody {
-    idx: string
+    id: string
 }
 
 export interface ParserClothPostResponse {
-    image: Uint8Array;
+    image: number[];
 }
 
 export async function POST(request: Request) {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    const cloth = await loadCloth(json.idx)
+    const cloth = await loadCloth(json.id)
     const result = await api.parserCloth(cloth);
     if (result.isErr()) {
         console.error(result.unwrapErr(), { headers: request.headers, url: request.url })

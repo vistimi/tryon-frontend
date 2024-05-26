@@ -4,8 +4,7 @@ import { Swiping } from "@/components/swiping";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext } from "@/components/context/loading";
 import { ImageContext } from "@/components/context/image";
-import { ParserClothPostBody, ParserClothPostResponse } from "./api/parserCloth/route";
-import { GenerativePostBody, GenerativePostResponse } from "./api/generative/route";
+import { swipeCloth, swipeGenerative, swipeHuman } from "./swiping";
 
 interface SwipingClothProps {}
 
@@ -13,67 +12,36 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     const { swiping, setSwiping } = useContext(SwipingContext);
     const { loading, setLoading } = useContext(LoadingContext);
     const {
-        openpose,
-        openposeLabel,
+        openpose, setOpenpose,
+        openposeLabel, setOpenposeLabel,
         setClothParser,
-        humanParser,
-        setGenerative
+        humanParser, setHumanParser,
+        setGenerative,
     } = useContext(ImageContext);
     const imageType = 'cloth'
 
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
-        const clothIdx = fileNames['cloth'][swiping.idxCloth]
-        const humanIdx = fileNames['human'][swiping.idxImage]
 
-        let clothParser : Uint8Array | null = null
-        // const resultParserCloth = await api.parserHuman(image)
-        // if (resultParserCloth.isOk()) {
-        //     const image = resultParserCloth.unwrap().image
-        //     clothParser = image
-        //     setClothParser(image)
-        // } else{
-        //     console.error('resultParserCloth', resultParserCloth.unwrapErr())
-        //     setClothParser(null)
-        // }
-        const bodyParserCloth: ParserClothPostBody = { idx: clothIdx }
-        const resultParserCloth = await fetch('/api/parserCloth', { method: 'POST', body: JSON.stringify(bodyParserCloth), headers: {'Content-Type': 'application/json' }});
-        if (resultParserCloth.ok) {
-            const { image }: ParserClothPostResponse = await resultParserCloth.json()
-            clothParser = image
-            setClothParser(image)
-        } else {
-            console.error('resultParserCloth', await resultParserCloth.text())
-            setClothParser(null)
+        const clothParser = await swipeCloth(swiping)
+        setClothParser(clothParser)
+
+        let openposeNew = openpose
+        let openposeLabelNew = openposeLabel
+        let humanParserNew = humanParser
+        if (openpose == null || openposeLabel == null || humanParser == null) {
+            const { openpose, openposeLabel, humanParser } = await swipeHuman(swiping)
+            openposeNew = openpose
+            openposeLabelNew = openposeLabel
+            humanParserNew = humanParser
+            setOpenpose(openpose)
+            setOpenposeLabel(openposeLabel)
+            setHumanParser(humanParser)
         }
 
-        if (openpose == null || openposeLabel == null || humanParser == null || clothParser == null) {
-            setLoading(false)
-            return
-        }
-
-        // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothParserImage)
-        // if (resultGenerative.isOk()) {
-        //     setGenerative(resultGenerative.unwrap().image)
-        // } else{
-        //     console.error('resultGenerative', resultGenerative.unwrapErr())
-        //     setGenerative(null)
-        // }
-        const bodyGenerative: GenerativePostBody = {
-            pose_rgb: openpose,
-            pose_label: openposeLabel,
-            human_idx: humanIdx,
-            human_parse: humanParser,
-            cloth_idx: clothIdx,
-            cloth_mask: clothParser,
-        }
-        const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
-        if (resultGenerative.ok) {
-            const { image }: GenerativePostResponse = await resultGenerative.json()
-            setGenerative(image)
-        } else {
-            console.error('resultGenerative', await resultGenerative.text())
-            setGenerative(null)
+        if (openposeNew != null && openposeLabelNew != null && humanParserNew != null && clothParser != null) {
+            const generative = await swipeGenerative(openposeNew, openposeLabelNew, humanParserNew, clothParser, swiping.idxHuman, swiping.idxCloth)
+            setGenerative(generative)
         }
         
         setLoading(false)
@@ -92,7 +60,7 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     }
 
     const swipeRight = (event: MouseEvent<SVGSVGElement>) => {
-        const swipingNew = { ...swiping, idxImage: getIdx(swiping.idxImage + 1) }
+        const swipingNew = { ...swiping, idxCloth: getIdx(swiping.idxCloth + 1) }
         swipe(swipingNew)
         setSwiping(swipingNew)
     }
@@ -113,6 +81,7 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     return (
         <Swiping
             alt={imageType}
+            alts={['prev', 'current', 'next']}
             imageSrc={`/dataset/${imageType}/${getId()}.jpg`}
             imageSrcs={[
                 `/dataset/${imageType}/${getId(-1)}.jpg`,

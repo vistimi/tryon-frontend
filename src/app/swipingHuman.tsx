@@ -3,9 +3,7 @@ import { Swiping } from "@/components/swiping";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext } from "@/components/context/loading";
 import { ImageContext } from "@/components/context/image";
-import { GenerativePostBody, GenerativePostResponse } from "./api/generative/route";
-import { OpenposePostBody, OpenposePostResponse } from "./api/openpose/route";
-import { ParserHumanPostBody, ParserHumanPostResponse } from "./api/parserHuman/route";
+import { swipeCloth, swipeGenerative, swipeHuman } from "./swiping";
 
 interface SwipingHumanProps {}
 
@@ -15,7 +13,7 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
     const {
         setOpenpose,
         setOpenposeLabel,
-        clothParser,
+        clothParser, setClothParser,
         setHumanParser,
         setGenerative
     } = useContext(ImageContext);
@@ -23,93 +21,21 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
 
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
-        const clothIdx = fileNames['cloth'][swiping.idxCloth]
-        const humanIdx = fileNames['human'][swiping.idxImage]
+        
+        const { openpose, openposeLabel, humanParser } = await swipeHuman(swiping)
+        setOpenpose(openpose)
+        setOpenposeLabel(openposeLabel)
+        setHumanParser(humanParser)
 
-        const bodyOpenpose: OpenposePostBody = { idx: humanIdx }
-        const promiseOpenpose = await fetch('/api/openpose', { method: 'POST', body: JSON.stringify(bodyOpenpose), headers: {'Content-Type': 'application/json' }});
-
-        const bodyParserHuman: ParserHumanPostBody = { idx: humanIdx }
-        const promiseParserHuman = await fetch('/api/parserHuman', { method: 'POST', body: JSON.stringify(bodyParserHuman), headers: {'Content-Type': 'application/json' }});
-
-        // const promiseOpenpose = api.openpose(image)
-        // const promiseParserHuman = api.parserHuman(image)
-        let openpose : Uint8Array | null = null
-        let openposeLabel : any | null = null
-        let humanParser : Uint8Array | null = null
-        await Promise
-            .all([promiseOpenpose, promiseParserHuman])
-            .then(async ([resultOpenpose, resultParserHuman]) => {                
-                // if (resultOpenpose.isOk()) {
-                //     const image = resultOpenpose.unwrap().image
-                //     openpose = image
-                //     setOpenpose(image)
-                //     const label = resultOpenpose.unwrap().label
-                //     openposeLabel = label
-                //     setOpenposeLabel(label)
-                // } else{
-                //     console.error('resultOpenpose', resultOpenpose.unwrapErr())
-                //     setOpenpose(null)
-                //     setOpenposeLabel(null)
-                // }
-                if (resultOpenpose.ok) {
-                    const { image, label }: OpenposePostResponse = await resultOpenpose.json()
-                    openpose = image
-                    setOpenpose(image)
-                    openposeLabel = label
-                    setOpenposeLabel(label)
-                } else {
-                    console.error('resultOpenpose', await resultOpenpose.text())
-                    setOpenpose(null)
-                    setOpenposeLabel(null)
-                }
-
-                // if (resultParserHuman.isOk()) {
-                //     const image = resultParserHuman.unwrap().image
-                //     humanParser = image
-                //     setHumanParser(image)
-                // } else{
-                //     console.error('resultParserHuman', resultParserHuman.unwrapErr())
-                //     setHumanParser(null)
-                // }
-
-                if (resultParserHuman.ok) {
-                    const { image }: ParserHumanPostResponse = await resultParserHuman.json()
-                    humanParser = image
-                    setHumanParser(image)
-                } else {
-                    console.error('resultParserHuman', await resultParserHuman.text())
-                    setHumanParser(null)
-                }
-            });
-
-        if (openpose == null || openposeLabel == null || humanParser == null || clothParser == null) {
-            setLoading(false)
-            return
+        let clothParserNew = clothParser
+        if (clothParser == null) {
+            const clothParser = await swipeCloth(swiping)
+            setClothParser(clothParser)
         }
 
-        // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothParser)
-        // if (resultGenerative.isOk()) {
-        //     setGenerative(resultGenerative.unwrap().image)
-        // } else{
-        //     console.error('resultGenerative', resultGenerative.unwrapErr())
-        //     setGenerative(null)
-        // }
-        const bodyGenerative: GenerativePostBody = {
-            pose_rgb: openpose,
-            pose_label: openposeLabel,
-            human_idx: humanIdx,
-            human_parse: humanParser,
-            cloth_idx: clothIdx,
-            cloth_mask: clothParser,
-        }
-        const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
-        if (resultGenerative.ok) {
-            const { image }: GenerativePostResponse = await resultGenerative.json()
-            setGenerative(image)
-        } else {
-            console.error('resultGenerative', await resultGenerative.text())
-            setGenerative(null)
+        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {
+            const generative = await swipeGenerative(openpose, openposeLabel, humanParser, clothParserNew, swiping.idxHuman, swiping.idxCloth)
+            setGenerative(generative)
         }
         
         setLoading(false)
@@ -122,13 +48,13 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
     }
 
     const swipeLeft = (event: MouseEvent<SVGSVGElement>) => {
-        const swipingNew = { ...swiping, idxImage: getIdx(swiping.idxImage - 1) }
+        const swipingNew = { ...swiping, idxHuman: getIdx(swiping.idxHuman - 1) }
         swipe(swipingNew)
         setSwiping(swipingNew)
     }
 
     const swipeRight = (event: MouseEvent<SVGSVGElement>) => {
-        const swipingNew = { ...swiping, idxImage: getIdx(swiping.idxImage + 1) }
+        const swipingNew = { ...swiping, idxHuman: getIdx(swiping.idxHuman + 1) }
         swipe(swipingNew)
         setSwiping(swipingNew)
     }
@@ -143,12 +69,13 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
     }
 
     const getId = (increment: number = 0) => {
-        return fileNames[imageType][getIdx(swiping.idxImage + increment)]
+        return fileNames[imageType][getIdx(swiping.idxHuman + increment)]
     }
 
     return (
         <Swiping
             alt={imageType}
+            alts={['prev', 'current', 'next']}
             imageSrc={`/dataset/${imageType}/${getId()}.jpg`}
             imageSrcs={[
                 `/dataset/${imageType}/${getId(-1)}.jpg`,

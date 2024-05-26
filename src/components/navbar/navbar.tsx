@@ -37,7 +37,7 @@ export const NavbarWeb = () => {
 					</Link>
 
 					{/* {Menu website} */}
-					<ul className="hidden lg:flex gap-5 ml-5">
+					<ul className="hidden md:flex gap-5 ml-5">
 					{siteConfig.navBarItems.map((item) => (
 						<NavbarItem key={item.href}>
 							<Link
@@ -49,7 +49,7 @@ export const NavbarWeb = () => {
 						</NavbarItem>
 					))}
 				</ul>
-				<NavbarMenuToggle className="flex lg:hidden h-10 w-min"/>
+				<NavbarMenuToggle className="flex md:hidden h-10 w-min"/>
 				
 				</NavbarBrand>
 			</NavbarContent>

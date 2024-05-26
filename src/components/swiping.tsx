@@ -3,6 +3,7 @@ import { LoadingWheel } from "./loadingWheel";
 
 interface SwipingProps {
     alt: string
+    alts: string[]
     imageSrc: string
     imageSrcs: string[]
     loading: boolean
@@ -14,13 +15,13 @@ export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRigh
     return (
         <div className="p-2 grid grid-cols-1" >
             <div className="p-2 grid grid-cols-10" >
-                {loading && swipeLeft ? <></> : <svg
+                {!loading && swipeLeft ? <svg
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                     className="z-10 row-span-full col-start-1 col-end-2 self-center w-8 h-8 transition-transform transform hover:scale-110 text-black"
                     onClick={swipeLeft}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 9l-3 3m0 0l3 3m-3-3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>}
+                </svg> : <></>}
 
                 {loading ? <div className="z-10 row-span-full col-start-5 col-end-6 self-center"><LoadingWheel /></div> : <></>}
 
@@ -35,16 +36,14 @@ export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRigh
                     priority={false}
                 />
 
-                {loading && swipeRight ? <></> : <svg
+                {!loading && swipeRight ? <svg
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
                     className="z-10 row-span-full col-start-10 col-end-11 self-center w-8 h-8 transition-transform transform hover:scale-110 text-black"
                     onClick={swipeRight}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>}
+                </svg> : <></>}
             </div >
-
-            <text className="text-center">{`Please select the ${alt}`}</text>
 
             <div className="p-2 grid grid-cols-3" >
                 <Image

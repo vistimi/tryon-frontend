@@ -2,16 +2,16 @@ import { Api } from "@/services/api"
 import { loadCloth, loadHuman } from "../load"
 
 export interface GenerativePostBody {
-    pose_rgb: Uint8Array
-    pose_label: Uint8Array
-    human_idx: string
-    human_parse: Uint8Array
-    cloth_idx: string
-    cloth_mask: Uint8Array
+    pose_rgb: number[]
+    pose_label: number[]
+    human_id: string
+    human_parse: number[]
+    cloth_id: string
+    cloth_mask: number[]
 }
 
 export interface GenerativePostResponse {
-    image: Uint8Array
+    image: number[]
 }
 
 export async function POST(request: Request) {
@@ -25,8 +25,8 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    const human = await loadHuman(json.human_idx)
-    const cloth = await loadCloth(json.cloth_idx)
+    const human = await loadHuman(json.human_id)
+    const cloth = await loadCloth(json.cloth_id)
     const result = await api.generative(
         json.pose_rgb,
         json.pose_label,

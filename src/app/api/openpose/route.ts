@@ -2,11 +2,11 @@ import { Api } from "@/services/api"
 import { loadHuman } from "../load";
 
 export interface OpenposePostBody {
-    idx: string
+    id: string
 }
 
 export interface OpenposePostResponse {
-    image: Uint8Array;
+    image: number[];
     label: any;
 }
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    const human = await loadHuman(json.idx)
+    const human = await loadHuman(json.id)
     const result = await api.openpose(human);
     if (result.isErr()) {
         console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
