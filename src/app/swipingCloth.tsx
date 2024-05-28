@@ -1,10 +1,10 @@
 import { MouseEvent, useContext } from "react"
-import { Api } from "@/services/api";
 import { Swiping } from "@/components/swiping";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext } from "@/components/context/loading";
 import { ImageContext } from "@/components/context/image";
 import { swipeCloth, swipeGenerative, swipeHuman } from "./swiping";
+import { readLocalStorage, removeLocalStorage, setLocalStorage } from "@/util/localstorage";
 
 interface SwipingClothProps {}
 
@@ -13,35 +13,71 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     const { loading, setLoading } = useContext(LoadingContext);
     const {
         openpose, setOpenpose,
-        openposeLabel, setOpenposeLabel,
         setClothParser,
         humanParser, setHumanParser,
         setGenerative,
     } = useContext(ImageContext);
     const imageType = 'cloth'
 
+    const keyOpenpose = 'openpose'
+	const keyHumanParser = 'human-parser'
+	const keyClothParser = 'cloth-parser'
+	const keyGenerative = 'generative'
+
+    type Openpose = {image: number[], format: string, label:any}
+	type Human = {image: number[], format: string}
+	type Cloth = {image: number[], format: string}
+	type Generative = {image: number[], format: string}
+
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
 
-        const clothParser = await swipeCloth(swiping)
-        setClothParser(clothParser)
+        const { clothMask, clothMaskFormat } = await swipeCloth(swiping)
+        if (clothMask != null && clothMaskFormat != null) {
+            setLocalStorage(keyClothParser, { image: clothMask, format: clothMaskFormat })
+            setClothParser({ id: keyClothParser, timestamp: new Date().toISOString() })
+        } else {
+            setClothParser(null)
+            removeLocalStorage(keyClothParser)
+        }        
+        
 
-        let openposeNew = openpose
-        let openposeLabelNew = openposeLabel
-        let humanParserNew = humanParser
-        if (openpose == null || openposeLabel == null || humanParser == null) {
-            const { openpose, openposeLabel, humanParser } = await swipeHuman(swiping)
-            openposeNew = openpose
-            openposeLabelNew = openposeLabel
-            humanParserNew = humanParser
-            setOpenpose(openpose)
-            setOpenposeLabel(openposeLabel)
-            setHumanParser(humanParser)
+        let openposeNew = openpose != null ? readLocalStorage<Openpose>(openpose.id) : null
+        let humanParserNew = humanParser != null ? readLocalStorage<Human>(humanParser.id) : null
+        if (openpose == null || humanParser == null) {
+            const { openpose, openposeFormat, openposeLabel, humanParser, humanParserFormat } = await swipeHuman(swiping)
+            
+            if (openpose != null && openposeFormat != null && openposeLabel != null) {
+                openposeNew = { image: openpose, format: openposeFormat, label: openposeLabel}
+                setLocalStorage(keyOpenpose, { image: openpose, format: openposeFormat, label: openposeLabel })
+                setOpenpose({ id: keyOpenpose, timestamp: new Date().toISOString() })
+            } else{
+                setOpenpose(null)
+                removeLocalStorage(keyOpenpose)
+            }
+
+            
+            if (humanParser != null) {
+                humanParserNew = humanParser
+                setHumanParser({ id: keyHumanParser, timestamp: new Date().toISOString() })
+                setLocalStorage(keyHumanParser, { image: humanParser, format: humanParserFormat })
+            } else {
+                setHumanParser(null)
+                removeLocalStorage(keyHumanParser)
+            }
+            
         }
 
-        if (openposeNew != null && openposeLabelNew != null && humanParserNew != null && clothParser != null) {
-            const generative = await swipeGenerative(openposeNew, openposeLabelNew, humanParserNew, clothParser, swiping.idxHuman, swiping.idxCloth)
-            setGenerative(generative)
+        if (openposeNew != null && humanParserNew != null && clothMask != null) {
+            // FIXME: first gen has one thing undefined
+            const { generative, generativeFormat } = await swipeGenerative(openposeNew.image, openposeNew.label, humanParserNew.image, clothMask, swiping.idxHuman, swiping.idxCloth)
+            if (generative != null) {
+                setGenerative({ id: keyGenerative, timestamp: new Date().toISOString() })
+                setLocalStorage(keyGenerative, { image: generative, format: generativeFormat })
+            } else {
+                setGenerative(null)
+                removeLocalStorage(keyGenerative)
+            }            
         }
         
         setLoading(false)

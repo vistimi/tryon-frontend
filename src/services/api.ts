@@ -187,31 +187,31 @@ export class Api {
     // };
 
     /** AI */
-    public parserHuman = async (image: number[]): Promise<Result<{image: number[]}, string>> => {
+    public parserHuman = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8082/prediction`, undefined, undefined, { image: image })
+        return await this.post(`:8082/prediction`, undefined, undefined, { image: image, image_format: 'jpeg' })
     };
     public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8082/ping`, undefined, undefined)
     };
 
-    public parserCloth = async (image: number[]): Promise<Result<{image: number[]}, string>> => {
+    public parserCloth = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8083/prediction`, undefined, undefined, { image: image })
+        return await this.post(`:8083/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', 'normalize': true })
     };
     public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8083/ping`, undefined, undefined)
     };
 
-    public openpose = async (image: number[]): Promise<Result<{image: number[], label: any}, string>> => {
+    public openpose = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string, label: any}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8081/prediction`, undefined, undefined, { image: image, output_quality: 100 })
+        return await this.post(`:8081/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', output_image_quality: 50, })
     };
     public openposePing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`:8081/ping`, undefined, undefined)
@@ -224,7 +224,7 @@ export class Api {
         human_parse: number[],
         cloth_rgb: number[],
         cloth_mask: number[],
-    ): Promise<Result<{image: number[]}, string>> => {
+    ): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         // if (!Array.isArray(pose_rgb) || !Array.isArray(pose_label) || !Array.isArray(human_rgb) || !Array.isArray(human_parse) || !Array.isArray(cloth_rgb) || !Array.isArray(cloth_mask)){
         //     return Err(`Image must be a list, pose_rgb ${typeof pose_rgb}, pose_label ${typeof pose_label}, human_rgb ${typeof human_rgb}, human_parse ${typeof human_parse}, cloth_rgb ${typeof cloth_rgb}, cloth_mask ${typeof cloth_mask}`);
         // }
@@ -235,7 +235,7 @@ export class Api {
             human_parse,
             cloth_rgb,
             cloth_mask,
-            output_quality: 50
+            output_image_quality: 20,
         })
     };
     public generativePing = async (): Promise<Result<{message: string}, string>> => {

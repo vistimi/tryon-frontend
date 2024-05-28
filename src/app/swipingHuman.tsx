@@ -4,6 +4,7 @@ import { SwipingContext, SwipingContextState } from "@/components/context/swipin
 import { LoadingContext } from "@/components/context/loading";
 import { ImageContext } from "@/components/context/image";
 import { swipeCloth, swipeGenerative, swipeHuman } from "./swiping";
+import { readLocalStorage, removeLocalStorage, setLocalStorage } from "@/util/localstorage";
 
 interface SwipingHumanProps {}
 
@@ -12,30 +13,64 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
     const { loading, setLoading } = useContext(LoadingContext);
     const {
         setOpenpose,
-        setOpenposeLabel,
         clothParser, setClothParser,
         setHumanParser,
         setGenerative
     } = useContext(ImageContext);
     const imageType = 'human'
 
+    const keyOpenpose = 'openpose'
+	const keyHumanParser = 'human-parser'
+	const keyClothParser = 'cloth-parser'
+	const keyGenerative = 'generative'
+
+    type Openpose = {image: number[], format: string, label:any}
+	type Human = {image: number[], format: string}
+	type Cloth = {image: number[], format: string}
+	type Generative = {image: number[], format: string}
+
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
         
-        const { openpose, openposeLabel, humanParser } = await swipeHuman(swiping)
-        setOpenpose(openpose)
-        setOpenposeLabel(openposeLabel)
-        setHumanParser(humanParser)
-
-        let clothParserNew = clothParser
-        if (clothParser == null) {
-            const clothParser = await swipeCloth(swiping)
-            setClothParser(clothParser)
+        const { openpose, openposeFormat, openposeLabel, humanParser, humanParserFormat } = await swipeHuman(swiping)
+        if (openpose != null && openposeFormat != null && openposeLabel != null) {
+            setLocalStorage(keyOpenpose, { image: openpose, format: openposeFormat, label: openposeLabel })
+            setOpenpose({ id: keyOpenpose, timestamp: new Date().toISOString() })
+        } else{
+            setOpenpose(null)
+            removeLocalStorage(keyOpenpose)
+        }
+        if (humanParser != null) {
+            setHumanParser({ id: keyHumanParser, timestamp: new Date().toISOString() })
+            setLocalStorage(keyHumanParser, { image: humanParser, format: humanParserFormat })
+        } else {
+            setHumanParser(null)
+            removeLocalStorage(keyHumanParser)
         }
 
-        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {
-            const generative = await swipeGenerative(openpose, openposeLabel, humanParser, clothParserNew, swiping.idxHuman, swiping.idxCloth)
-            setGenerative(generative)
+        let clothParserNew = clothParser != null ? readLocalStorage<Cloth>(clothParser.id) : null
+        if (clothParser == null) {
+            const { clothMask, clothMaskFormat } = await swipeCloth(swiping)
+            if (clothMask != null && clothMaskFormat != null) {
+                clothParserNew = { image: clothMask, format: clothMaskFormat }
+                setLocalStorage(keyClothParser, { image: clothMask, format: clothMaskFormat })
+                setClothParser({ id: keyClothParser, timestamp: new Date().toISOString() })
+            } else {
+                setClothParser(null)
+                removeLocalStorage(keyClothParser)
+            }
+        }
+
+        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {$
+            // FIXME: first gen has one thing undefined
+            const { generative, generativeFormat } = await swipeGenerative(openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth)
+            if (generative != null) {
+                setGenerative({ id: keyGenerative, timestamp: new Date().toISOString() })
+                setLocalStorage(keyGenerative, { image: generative, format: generativeFormat })
+            } else {
+                setGenerative(null)
+                removeLocalStorage(keyGenerative)
+            }
         }
         
         setLoading(false)

@@ -1,13 +1,10 @@
 import { Dispatch, SetStateAction, createContext } from "react";
 
-export type ImageContextOpenposeLabel = any | null
-export type ImageContextOpenpose = number[] | null
-export type ImageContextHumanParser = number[] | null
-export type ImageContextClothParser = number[] | null
-export type ImageContextGenerative = number[] | null
+export type ImageContextOpenpose = {id: string, timestamp: string} | null
+export type ImageContextHumanParser = {id: string, timestamp: string} | null
+export type ImageContextClothParser = {id: string, timestamp: string} | null
+export type ImageContextGenerative = {id: string, timestamp: string} | null
 export const ImageContext = createContext<{
-    openposeLabel: ImageContextOpenposeLabel,
-    setOpenposeLabel: Dispatch<SetStateAction<ImageContextOpenposeLabel>>
     openpose: ImageContextOpenpose,
     setOpenpose: Dispatch<SetStateAction<ImageContextOpenpose>>    
     humanParser: ImageContextHumanParser,
@@ -17,7 +14,6 @@ export const ImageContext = createContext<{
     generative: ImageContextGenerative,
     setGenerative: Dispatch<SetStateAction<ImageContextGenerative>>
 }>({
-    openposeLabel: null, setOpenposeLabel: () => {},
     openpose: null, setOpenpose: () => {},    
     humanParser: null, setHumanParser: () => {},
     clothParser: null, setClothParser: () => {},

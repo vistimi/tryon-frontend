@@ -7,24 +7,37 @@ import { LoadingContext, LoadingContextState } from "@/components/context/loadin
 import { ImageContext, ImageContextClothParser, ImageContextGenerative, ImageContextHumanParser, ImageContextOpenpose } from "@/components/context/image";
 import { SwipingCloth } from "./swipingCloth";
 import { Swiping } from "@/components/swiping";
+import { readLocalStorage } from "@/util/localstorage";
 
 export default function Home() {
 	const [swiping, setSwiping] = useState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 })
 	const [loading, setLoading] = useState<LoadingContextState>(false)
-	const [openposeLabel, setOpenposeLabel] = useState<any>(null)
+
+	const keyOpenpose = 'openpose'
+	const keyHumanParser = 'human-parser'
+	const keyClothParser = 'cloth-parser'
+	const keyGenerative = 'generative'
+
 	const [openpose, setOpenpose] = useState<ImageContextOpenpose>(null)
 	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>(null)
 	const [clothParser, setClothParser] = useState<ImageContextClothParser>(null)
 	const [generative, setGenerative] = useState<ImageContextGenerative>(null)
 
+	type Openpose = {image: number[], format: string, label:any}
+	type Human = {image: number[], format: string}
+	type Cloth = {image: number[], format: string}
+	type Generative = {image: number[], format: string}
+
 	const [humanParserScaled, setHumanParserScaled] = useState<null|string>(null)
 	useEffect(() => {
-		if (humanParser) {
+		if (humanParser?.id) {
 			const canvas = document.createElement('canvas')
 			const ctx = canvas.getContext('2d')
 			if (!ctx || !canvas) return
 			const image = new Image()
-			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(humanParser)))}`
+			const data = readLocalStorage<Human>(humanParser.id)?.image
+			if (!data) return
+			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(data)))}`
 			image.onload = () => {
 				canvas.width = image.width
 				canvas.height = image.height
@@ -53,12 +66,14 @@ export default function Home() {
 
 	const [clothParserScaled, setClothParserScaled] = useState<null|string>(null)
 	useEffect(() => {
-		if (clothParser) {
+		if (clothParser?.id) {
 			const canvas = document.createElement('canvas')
 			const ctx = canvas.getContext('2d')
 			if (!ctx || !canvas) return
 			const image = new Image()
-			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(clothParser)))}`
+			const data = readLocalStorage<Cloth>(clothParser.id)?.image
+			if (!data) return
+			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(data)))}`
 			image.onload = () => {
 				canvas.width = image.width
 				canvas.height = image.height
@@ -102,7 +117,6 @@ export default function Home() {
 				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center flex flex-col md:flex-row">
 						<ImageContext.Provider 
 							value={{
-								openposeLabel, setOpenposeLabel,
 								openpose, setOpenpose,								
 								humanParser, setHumanParser,
 								clothParser, setClothParser,
@@ -124,9 +138,9 @@ export default function Home() {
 											<Swiping
 												alt="result"
 												alts={['openpose', 'human-parser', 'cloth-parser']}
-												imageSrc={generative ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(generative)))}` : ''}
+												imageSrc={generative ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(readLocalStorage<Generative>(generative.id)?.image || [])))}` : ''}
 												imageSrcs={[
-													openpose ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(openpose)))}` : '',
+													openpose?.id ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(readLocalStorage<Openpose>(openpose.id)?.image || [])))}` : '',
 													humanParserScaled ? humanParserScaled : '',
 													clothParserScaled ? clothParserScaled : '',
 												]}

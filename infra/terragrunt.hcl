@@ -143,20 +143,12 @@ EOT
                   }
                   context_path = local.root_path
                   file_path    = "Dockerfile" # file_path from the context_path
-                  path_include = ["**"]
+                  path_include = ["**/src/**", "**/public/**"] # add config files
                   path_exclude = ["**/node_modules/**", "**/.next/**"] # these are files to be ignored for generating a new image such as files in .gitignore
                 }
               }
 
               traffics = [
-                {
-                  listener = {
-                    protocol = "http"
-                  }
-                  target = {
-                    port              = 3000
-                  }
-                },
                 {
                   listener = {
                     protocol = "https"

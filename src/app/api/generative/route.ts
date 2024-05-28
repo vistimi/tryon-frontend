@@ -11,7 +11,8 @@ export interface GenerativePostBody {
 }
 
 export interface GenerativePostResponse {
-    image: number[]
+    output_image: number[]
+    output_image_format:string
 }
 
 export async function POST(request: Request) {
@@ -24,6 +25,13 @@ export async function POST(request: Request) {
         default:
             return new Response('Unsupported Media Type', { status: 415 });
     }
+
+    // pose_rgb: openpose,
+    // pose_label: openposeLabel,
+    // human_id: humanId,
+    // human_parse: humanParser,
+    // cloth_id: clothId,
+    // cloth_mask: clothParser,
 
     const human = await loadHuman(json.human_id)
     const cloth = await loadCloth(json.cloth_id)

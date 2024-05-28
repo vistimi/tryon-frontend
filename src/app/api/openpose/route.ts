@@ -6,7 +6,8 @@ export interface OpenposePostBody {
 }
 
 export interface OpenposePostResponse {
-    image: number[];
+    output_image: number[]
+    output_image_format:string
     label: any;
 }
 

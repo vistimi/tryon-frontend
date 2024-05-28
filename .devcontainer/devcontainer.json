@@ -10,7 +10,7 @@
 		// "--name=tryon-frontend",
 		"--env-file=.devcontainer/devcontainer.env" // devcontainer.env must exist
 	],
-	// "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+	"mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
 	// "initializeCommand": "if [ ! \"$(docker network ls | grep tryon-net)\" ]; then docker network create tryon-net; fi",
 	// "postStartCommand": "curl -fsSL https://bun.sh/install | bash && source /home/node/.bashrc",
 	"customizations": {

@@ -23,11 +23,11 @@ export const swipeCloth = async (swiping: SwipingContextState) => {
     const bodyParserCloth: ParserClothPostBody = { id: clothId }
     const resultParserCloth = await fetch('/api/parserCloth', { method: 'POST', body: JSON.stringify(bodyParserCloth), headers: {'Content-Type': 'application/json' }});
     if (resultParserCloth.ok) {
-        const { image }: ParserClothPostResponse = await resultParserCloth.json()
-        return image
+        const { output_image, output_image_format }: ParserClothPostResponse = await resultParserCloth.json()
+        return { clothMask: output_image, clothMaskFormat: output_image_format }
     } else {
         console.error('resultParserCloth', await resultParserCloth.text())
-        return null
+        return { clothMask: null, clothMaskFormat: null }
     }
 }
 
@@ -41,8 +41,10 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
     const promiseParserHuman = await fetch('/api/parserHuman', { method: 'POST', body: JSON.stringify(bodyParserHuman), headers: {'Content-Type': 'application/json' }});
 
     let openpose: number[] | null = null
+    let openposeFormat: string | null = null
     let openposeLabel: number[] | null = null
     let humanParser: number[] | null = null
+    let humanParserFormat: string | null = null
     await Promise
         .all([promiseOpenpose, promiseParserHuman])
         .then(async ([resultOpenpose, resultParserHuman]) => {                
@@ -59,8 +61,9 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
             //     setOpenposeLabel(null)
             // }            
             if (resultOpenpose.ok) {
-                const { image, label }: OpenposePostResponse = await resultOpenpose.json()
-                openpose = image
+                const { output_image, output_image_format, label }: OpenposePostResponse = await resultOpenpose.json()
+                openpose = output_image
+                openposeFormat = output_image_format
                 openposeLabel = label
             } else {
                 console.error('resultOpenpose', await resultOpenpose.text())
@@ -75,14 +78,15 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
             //     setHumanParser(null)
             // }            
             if (resultParserHuman.ok) {
-                const { image }: ParserHumanPostResponse = await resultParserHuman.json()
-                humanParser = image
+                const { output_image, output_image_format }: ParserHumanPostResponse = await resultParserHuman.json()
+                humanParser = output_image
+                humanParserFormat = output_image_format
             } else {
                 console.error('resultParserHuman', await resultParserHuman.text())
             }            
         });
 
-    return { openpose, openposeLabel, humanParser }
+    return { openpose, openposeFormat, openposeLabel, humanParser, humanParserFormat }
 }
 
 export const swipeGenerative = async (
@@ -113,10 +117,10 @@ export const swipeGenerative = async (
     }
     const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
     if (resultGenerative.ok) {
-        const { image }: GenerativePostResponse = await resultGenerative.json()
-        return image
+        const { output_image, output_image_format }: GenerativePostResponse = await resultGenerative.json()
+        return { generative: output_image, generativeFormat: output_image_format }
     } else {
         console.error('resultGenerative', await resultGenerative.text())
-        return null
+        return { generative: null, generativeFormat: null }
     }
 }

@@ -6,7 +6,8 @@ export interface ParserHumanPostBody {
 }
 
 export interface ParserHumanPostResponse {
-    image: number[];
+    output_image: number[]
+    output_image_format:string
 }
 
 export async function POST(request: Request) {

@@ -75,7 +75,6 @@ export const NavbarWeb = () => {
 							<Link
 								color="primary"
 								href={item.href}
-								size="lg"
 							>
 								{item.label}
 							</Link>
