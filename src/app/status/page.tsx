@@ -10,7 +10,7 @@ export default function Status () {
         generative?: boolean
         openpose?: boolean
         humanParser?: boolean
-        clothParser?: boolean
+        clothMask?: boolean
     }>({})
 
     const ping = async () => {
@@ -26,7 +26,7 @@ export default function Status () {
                     generative: responseGenerative.ok,
                     openpose: responseOpenpose.ok,
                     humanParser: responseParserHuman.ok,
-                    clothParser: responseParserCloth.ok,
+                    clothMask: responseParserCloth.ok,
                 }
                 setStatus(status)
             });
@@ -103,8 +103,8 @@ export default function Status () {
             <div>
                 <h2>Cloth Parser</h2>
                 {
-                    status.clothParser !== undefined ? (
-                        status.clothParser ? (
+                    status.clothMask !== undefined ? (
+                        status.clothMask ? (
                             <CheckCircleIcon style={{ color: 'green'}} size={42}/>
                         ) : (
                             <CrossCircleIcon style={{ color: 'red'}} size={42}/>

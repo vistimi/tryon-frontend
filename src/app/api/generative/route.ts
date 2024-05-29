@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     // human_id: humanId,
     // human_parse: humanParser,
     // cloth_id: clothId,
-    // cloth_mask: clothParser,
+    // cloth_mask: clothMask,
 
     const human = await loadHuman(json.human_id)
     const cloth = await loadCloth(json.cloth_id)

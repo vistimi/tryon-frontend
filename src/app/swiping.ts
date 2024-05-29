@@ -14,20 +14,20 @@ export const swipeCloth = async (swiping: SwipingContextState) => {
     // const resultParserCloth = await api.parserHuman(image)
     // if (resultParserCloth.isOk()) {
     //     const image = resultParserCloth.unwrap().image
-    //     clothParser = image
-    //     setClothParser(image)
+    //     clothMask = image
+    //     setClothMask(image)
     // } else{
     //     console.error('resultParserCloth', resultParserCloth.unwrapErr())
-    //     setClothParser(null)
+    //     setClothMask(null)
     // }
     const bodyParserCloth: ParserClothPostBody = { id: clothId }
     const resultParserCloth = await fetch('/api/parserCloth', { method: 'POST', body: JSON.stringify(bodyParserCloth), headers: {'Content-Type': 'application/json' }});
     if (resultParserCloth.ok) {
         const { output_image, output_image_format }: ParserClothPostResponse = await resultParserCloth.json()
-        return { clothMask: output_image, clothMaskFormat: output_image_format }
+        return { clothMaskImage: output_image, clothMaskImageFormat: output_image_format }
     } else {
         console.error('resultParserCloth', await resultParserCloth.text())
-        return { clothMask: null, clothMaskFormat: null }
+        return { clothMaskImage: null, clothMaskImageFormat: null }
     }
 }
 
@@ -40,11 +40,11 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
     const bodyParserHuman: ParserHumanPostBody = { id: humanId }
     const promiseParserHuman = await fetch('/api/parserHuman', { method: 'POST', body: JSON.stringify(bodyParserHuman), headers: {'Content-Type': 'application/json' }});
 
-    let openpose: number[] | null = null
-    let openposeFormat: string | null = null
+    let openposeImage: number[] | null = null
+    let openposeImageFormat: string | null = null
     let openposeLabel: number[] | null = null
-    let humanParser: number[] | null = null
-    let humanParserFormat: string | null = null
+    let humanParserImage: number[] | null = null
+    let humanParserImageFormat: string | null = null
     await Promise
         .all([promiseOpenpose, promiseParserHuman])
         .then(async ([resultOpenpose, resultParserHuman]) => {                
@@ -62,8 +62,8 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
             // }            
             if (resultOpenpose.ok) {
                 const { output_image, output_image_format, label }: OpenposePostResponse = await resultOpenpose.json()
-                openpose = output_image
-                openposeFormat = output_image_format
+                openposeImage = output_image
+                openposeImageFormat = output_image_format
                 openposeLabel = label
             } else {
                 console.error('resultOpenpose', await resultOpenpose.text())
@@ -79,28 +79,28 @@ export const swipeHuman = async (swiping: SwipingContextState) => {
             // }            
             if (resultParserHuman.ok) {
                 const { output_image, output_image_format }: ParserHumanPostResponse = await resultParserHuman.json()
-                humanParser = output_image
-                humanParserFormat = output_image_format
+                humanParserImage = output_image
+                humanParserImageFormat = output_image_format
             } else {
                 console.error('resultParserHuman', await resultParserHuman.text())
             }            
         });
 
-    return { openpose, openposeFormat, openposeLabel, humanParser, humanParserFormat }
+    return { openposeImage, openposeImageFormat, openposeLabel, humanParserImage, humanParserImageFormat }
 }
 
 export const swipeGenerative = async (
     openpose: number[],
     openposeLabel: number[],
     humanParser: number[],
-    clothParser: number[],
+    clothMask: number[],
     idxHuman: number,
     idxCloth: number,
 ) => {
     const clothId = fileNames['cloth'][idxCloth]
     const humanId = fileNames['human'][idxHuman]
 
-    // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothParserImage)
+    // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothMaskImage)
     // if (resultGenerative.isOk()) {
     //     setGenerative(resultGenerative.unwrap().image)
     // } else{
@@ -113,14 +113,14 @@ export const swipeGenerative = async (
         human_id: humanId,
         human_parse: humanParser,
         cloth_id: clothId,
-        cloth_mask: clothParser,
+        cloth_mask: clothMask,
     }
     const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
     if (resultGenerative.ok) {
         const { output_image, output_image_format }: GenerativePostResponse = await resultGenerative.json()
-        return { generative: output_image, generativeFormat: output_image_format }
+        return { generativeImage: output_image, generativeImageFormat: output_image_format }
     } else {
         console.error('resultGenerative', await resultGenerative.text())
-        return { generative: null, generativeFormat: null }
+        return { generativeImage: null, generativeImageFormat: null }
     }
 }

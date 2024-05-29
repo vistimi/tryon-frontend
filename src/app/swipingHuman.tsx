@@ -1,3 +1,5 @@
+'use client'
+
 import { MouseEvent, useContext } from "react"
 import { Swiping } from "@/components/swiping";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
@@ -5,6 +7,8 @@ import { LoadingContext } from "@/components/context/loading";
 import { ImageContext } from "@/components/context/image";
 import { swipeCloth, swipeGenerative, swipeHuman } from "./swiping";
 import { readLocalStorage, removeLocalStorage, setLocalStorage } from "@/util/localstorage";
+import { Cloth } from "@/types/ai";
+import { NoSsr } from "@/components/global/noSsr";
 
 interface SwipingHumanProps {}
 
@@ -12,68 +16,65 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
     const { swiping, setSwiping } = useContext(SwipingContext);
     const { loading, setLoading } = useContext(LoadingContext);
     const {
-        setOpenpose,
-        clothParser, setClothParser,
-        setHumanParser,
-        setGenerative
+        openpose, setOpenpose,
+        clothMask, setClothMask,
+        humanParser, setHumanParser,
+        generative, setGenerative,
     } = useContext(ImageContext);
     const imageType = 'human'
-
-    const keyOpenpose = 'openpose'
-	const keyHumanParser = 'human-parser'
-	const keyClothParser = 'cloth-parser'
-	const keyGenerative = 'generative'
-
-    type Openpose = {image: number[], format: string, label:any}
-	type Human = {image: number[], format: string}
-	type Cloth = {image: number[], format: string}
-	type Generative = {image: number[], format: string}
 
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
         
-        const { openpose, openposeFormat, openposeLabel, humanParser, humanParserFormat } = await swipeHuman(swiping)
-        if (openpose != null && openposeFormat != null && openposeLabel != null) {
-            setLocalStorage(keyOpenpose, { image: openpose, format: openposeFormat, label: openposeLabel })
-            setOpenpose({ id: keyOpenpose, timestamp: new Date().toISOString() })
-        } else{
-            setOpenpose(null)
-            removeLocalStorage(keyOpenpose)
-        }
-        if (humanParser != null && humanParserFormat != null) {
-            setHumanParser({ id: keyHumanParser, timestamp: new Date().toISOString() })
-            setLocalStorage(keyHumanParser, { image: humanParser, format: humanParserFormat })
+        // Human Parser and Openpose
+        const { openposeImage, openposeImageFormat, openposeLabel, humanParserImage, humanParserImageFormat } = await swipeHuman(swiping)
+            
+        if (openposeImage != null && openposeImageFormat != null && openposeLabel != null) {
+            setLocalStorage(openpose.id, { image: openposeImage, format: openposeImageFormat, label: openposeLabel })
+            setOpenpose({...openpose})
         } else {
-            setHumanParser(null)
-            removeLocalStorage(keyHumanParser)
+            removeLocalStorage(openpose.id)
+            setOpenpose({...openpose})                
+        }
+        
+        if (humanParserImage != null && humanParserImageFormat != null) {            
+            setLocalStorage(humanParser.id, { image: humanParserImage, format: humanParserImageFormat })
+            setHumanParser({...humanParser})
+        } else {
+            removeLocalStorage(humanParser.id)
+            setHumanParser({...humanParser})                
         }
 
-        let clothParserNew = clothParser != null ? readLocalStorage<Cloth>(clothParser.id) : null
-        if (clothParser == null) {
-            const { clothMask, clothMaskFormat } = await swipeCloth(swiping)
-            if (clothMask != null && clothMaskFormat != null) {
-                clothParserNew = { image: clothMask, format: clothMaskFormat }
-                setLocalStorage(keyClothParser, { image: clothMask, format: clothMaskFormat })
-                setClothParser({ id: keyClothParser, timestamp: new Date().toISOString() })
+        // Cloth Mask
+        let clothMaskNew = readLocalStorage<Cloth>(clothMask.id)
+        if (clothMaskNew == null) {
+            const { clothMaskImage: clothMaskImageNew, clothMaskImageFormat: clothMaskImageFormatNew } = await swipeCloth(swiping)
+
+            if (clothMaskImageNew != null && clothMaskImageFormatNew != null) {
+                clothMaskNew = { image: clothMaskImageNew, format: clothMaskImageFormatNew }
+                setLocalStorage(clothMask.id, { image: clothMaskImageNew, format: clothMaskImageFormatNew })
+                setClothMask({ ...clothMask})
             } else {
-                setClothParser(null)
-                removeLocalStorage(keyClothParser)
+                removeLocalStorage(clothMask.id)
+                setClothMask({ ...clothMask})            
             }
         }
 
-        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {
-            // FIXME: first gen has one thing undefined
-            console.log("openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth", openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth)
-            const { generative, generativeFormat } = await swipeGenerative(openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth)
-            if (generative != null) {
-                setGenerative({ id: keyGenerative, timestamp: new Date().toISOString() })
-                setLocalStorage(keyGenerative, { image: generative, format: generativeFormat })
+        // Generative
+        console.log(openposeImage, openposeLabel, humanParserImage, clothMaskNew?.image, swiping.idxHuman, swiping.idxCloth)
+        if (openposeImage != null && openposeLabel != null && humanParserImage != null && clothMaskNew != null) {
+            
+            const { generativeImage, generativeImageFormat } = await swipeGenerative(openposeImage, openposeLabel, humanParserImage, clothMaskNew.image, swiping.idxHuman, swiping.idxCloth)
+            if (generativeImage != null && generativeImageFormat != null) {                
+                setLocalStorage(generative.id, { image: generativeImage, format: generativeImageFormat })
+                setGenerative({ ...generative})
             } else {
-                setGenerative(null)
-                removeLocalStorage(keyGenerative)
+                removeLocalStorage(generative.id)
+                setGenerative({ ...generative})                
             }
         }
         
+        setSwiping({ idxHuman: swiping.idxHuman, idxCloth: swiping.idxCloth })
         setLoading(false)
         return
     }
@@ -104,23 +105,25 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
         return idx
     }
 
-    const getId = (increment: number = 0) => {
-        return fileNames[imageType][getIdx(swiping.idxHuman + increment)]
+    const getId = (imageType: "human" | "cloth", idx: number, increment: number = 0) => {
+        return fileNames[imageType][getIdx(idx + increment)]
     }
 
     return (
-        <Swiping
-            alt={imageType}
-            alts={['prev', 'current', 'next']}
-            imageSrc={`/dataset/${imageType}/${getId()}.jpg`}
-            imageSrcs={[
-                `/dataset/${imageType}/${getId(-1)}.jpg`,
-                `/dataset/${imageType}/${getId()}.jpg`,
-                `/dataset/${imageType}/${getId(1)}.jpg`,
-            ]}
-            loading={loading}
-            swipeLeft={swipeLeft}
-            swipeRight={swipeRight}
-        />
+        <NoSsr>
+            <Swiping
+                alt={imageType}
+                alts={['prev', 'current', 'next']}
+                imageSrc={`/dataset/${imageType}/${getId(imageType, swiping.idxHuman)}.jpg`}
+                imageSrcs={[
+                    `/dataset/${imageType}/${getId(imageType, swiping.idxHuman, -1)}.jpg`,
+                    `/dataset/${imageType}/${getId(imageType, swiping.idxHuman)}.jpg`,
+                    `/dataset/${imageType}/${getId(imageType, swiping.idxHuman, 1)}.jpg`,
+                ]}
+                loading={loading}
+                swipeLeft={swipeLeft}
+                swipeRight={swipeRight}
+            />
+        </NoSsr>
     );
 }

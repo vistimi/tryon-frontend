@@ -30,6 +30,13 @@ export const readLocalStorage = <T>(id: string): T | null => {
     return null;
 }
 
+export const setExpiryFromLocalStorage = (id: string, expiresInSeconds: number): void => {
+    const tokenData = readLocalStorage(id);
+    if (tokenData) {
+        setLocalStorage(id, tokenData, expiresInSeconds);
+    }
+}
+
 export const removeLocalStorage = (id: string) => {
     localStorage.removeItem(id)
 }

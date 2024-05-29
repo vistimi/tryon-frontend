@@ -4,101 +4,100 @@ import { useEffect, useState } from "react";
 import { SwipingHuman } from "./swipingHuman";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext, LoadingContextState } from "@/components/context/loading";
-import { ImageContext, ImageContextClothParser, ImageContextGenerative, ImageContextHumanParser, ImageContextOpenpose } from "@/components/context/image";
+import { ImageContext, ImageContextclothMask, ImageContextGenerative, ImageContextHumanParser, ImageContextOpenpose } from "@/components/context/image";
 import { SwipingCloth } from "./swipingCloth";
 import { Swiping } from "@/components/swiping";
 import { readLocalStorage } from "@/util/localstorage";
+import usePersistState from "@/util/hooks/usePersistState";
+import { Cloth, Generative, Human, Openpose } from "@/types/ai";
 
 export default function Home() {
-	const [swiping, setSwiping] = useState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 })
+	const [swiping, setSwiping] = usePersistState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 }, 'idx')
 	const [loading, setLoading] = useState<LoadingContextState>(false)
 
-	const keyOpenpose = 'openpose'
-	const keyHumanParser = 'human-parser'
-	const keyClothParser = 'cloth-parser'
-	const keyGenerative = 'generative'
+	const [openpose, setOpenpose] = useState<ImageContextOpenpose>({id: 'openpose'})
+	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>({id: 'human-parser'})
+	const [clothMask, setClothMask] = useState<ImageContextclothMask>({id: 'cloth-parser'})
+	const [generative, setGenerative] = useState<ImageContextGenerative>({id: 'generative'})
 
-	const [openpose, setOpenpose] = useState<ImageContextOpenpose>(null)
-	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>(null)
-	const [clothParser, setClothParser] = useState<ImageContextClothParser>(null)
-	const [generative, setGenerative] = useState<ImageContextGenerative>(null)
+	const formatImage = (data: number[], scale?:boolean): Promise<null | string> => {
+		return new Promise((resolve, reject) => {
+			const src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(data)))}`
+			if (!scale) resolve(src)
+			
+			if (scale) {
+				const canvas = document.createElement('canvas')
+				const ctx = canvas.getContext('2d')
+				if (!ctx || !canvas) {
+					resolve(null)
+					return
+				}
+				const image = new Image()
+				image.src = src
+				image.onload = () => {
+					canvas.width = image.width
+					canvas.height = image.height
+					ctx.drawImage(image, 0, 0, image.width, image.height)
+					let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+					let data = imageData.data
+					let max = 0
+					for (let i = 0; i < data.length; i += 4) {
+						const pixelValue = Math.max(data[i], data[i + 1], data[i + 2])
+						max = Math.max(max, pixelValue)
+					}
+					const scale = 256 / max
+					for (let i = 0; i < data.length; i += 4) {
+						data[i]     = data[i] * scale     // Red channel
+						data[i + 1] = data[i + 1] * scale // Green channel
+						data[i + 2] = data[i + 2] * scale // Blue channel
+					}
+					ctx.putImageData(imageData, 0, 0)
+					const base64Image = canvas.toDataURL("image/png");
+					resolve(base64Image)
+				}
+				image.onerror = (err) => {
+					reject(err);
+				}
+			}
+		});
+	}
 
-	type Openpose = {image: number[], format: string, label:any}
-	type Human = {image: number[], format: string}
-	type Cloth = {image: number[], format: string}
-	type Generative = {image: number[], format: string}
-
-	const [humanParserScaled, setHumanParserScaled] = useState<null|string>(null)
-	useEffect(() => {
-		if (humanParser?.id) {
-			const canvas = document.createElement('canvas')
-			const ctx = canvas.getContext('2d')
-			if (!ctx || !canvas) return
-			const image = new Image()
+	const [humanParserImageScaled, setHumanParserImageScaled] = useState<null|string>(null)
+	const [clothMaskImageScaled, setClothMaskImageScaled] = useState<null|string>(null)
+	const [openposeImageScaled, setOpenposeImageScaled] = useState<null|string>(null)
+	const [generativeImageScaled, setGenerativeImageScaled] = useState<null|string>(null)
+	useEffect(() => {		
+		(async () => {
 			const data = readLocalStorage<Human>(humanParser.id)?.image
 			if (!data) return
-			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(data)))}`
-			image.onload = () => {
-				canvas.width = image.width
-				canvas.height = image.height
-				ctx.drawImage(image, 0, 0, image.width, image.height)
-				let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-				let data = imageData.data
-				let max = 0
-				for (let i = 0; i < data.length; i += 4) {
-					const pixelValue = Math.max(data[i], data[i + 1], data[i + 2])
-					max = Math.max(max, pixelValue)
-				}
-				const scale = 256 / max
-				for (let i = 0; i < data.length; i += 4) {
-					data[i]     = data[i] * scale     // Red channel
-					data[i + 1] = data[i + 1] * scale // Green channel
-					data[i + 2] = data[i + 2] * scale // Blue channel
-				}
-				ctx.putImageData(imageData, 0, 0)
-				// setHumanParserScaled(Array.from(new Uint8Array(data.data)))
-				const base64Image = canvas.toDataURL("image/png");
-				setHumanParserScaled(base64Image)
-				// console.info('base64Image', base64Image.split(",")[1])
-			}
-		}
+			const base64Image = await formatImage(data, true)
+			setHumanParserImageScaled(base64Image)
+		})()
 	}, [humanParser])
-
-	const [clothParserScaled, setClothParserScaled] = useState<null|string>(null)
 	useEffect(() => {
-		if (clothParser?.id) {
-			const canvas = document.createElement('canvas')
-			const ctx = canvas.getContext('2d')
-			if (!ctx || !canvas) return
-			const image = new Image()
-			const data = readLocalStorage<Cloth>(clothParser.id)?.image
+		(async () => {
+			const data = readLocalStorage<Cloth>(clothMask.id)?.image
 			if (!data) return
-			image.src = `data:image/png;base64,${btoa(String.fromCharCode(...new Uint8Array(data)))}`
-			image.onload = () => {
-				canvas.width = image.width
-				canvas.height = image.height
-				ctx.drawImage(image, 0, 0, image.width, image.height)
-				let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-				let data = imageData.data
-				let max = 0
-				for (let i = 0; i < data.length; i += 4) {
-					const pixelValue = Math.max(data[i], data[i + 1], data[i + 2])
-					max = Math.max(max, pixelValue)
-				}
-				const scale = 256 / max
-				for (let i = 0; i < data.length; i += 4) {
-					data[i]     = data[i] * scale     // Red channel
-					data[i + 1] = data[i + 1] * scale // Green channel
-					data[i + 2] = data[i + 2] * scale // Blue channel
-				}
-				ctx.putImageData(imageData, 0, 0)
-				// setClothParserScaled(Array.from(new Uint8Array(data.data)))
-				const base64Image = canvas.toDataURL("image/png");
-				setClothParserScaled(base64Image)
-				// console.info('base64Image', base64Image.split(",")[1])
-			}
-		}
-	}, [clothParser])
+			const base64Image = await formatImage(data)
+			setClothMaskImageScaled(base64Image)
+		})()
+	}, [clothMask])
+	useEffect(() => {
+		(async () => {
+			const data = readLocalStorage<Openpose>(openpose.id)?.image
+			if (!data) return
+			const base64Image = await formatImage(data)
+			setOpenposeImageScaled(base64Image)
+		})()		
+	}, [openpose])
+	useEffect(() => {
+		(async () => {
+			const data = readLocalStorage<Generative>(generative.id)?.image
+			if (!data) return
+			const base64Image = await formatImage(data)
+			setGenerativeImageScaled(base64Image)
+		})()		
+	}, [generative])
 
 	return (
 		<section className="flex flex-col">
@@ -119,7 +118,7 @@ export default function Home() {
 							value={{
 								openpose, setOpenpose,								
 								humanParser, setHumanParser,
-								clothParser, setClothParser,
+								clothMask, setClothMask,
 								generative, setGenerative
 							}}
 						>
@@ -127,26 +126,26 @@ export default function Home() {
 								<SwipingContext.Provider value={{ swiping, setSwiping }}>
 									<div className="max-w-sm text-center">
 										<SwipingHuman />
-										<text>{`Please select the model`}</text>
+										<p>{`Please select the model`}</p>
 									</div>
 									<div className="max-w-sm text-center">										
 										<SwipingCloth />
-										<text>{`Please select the cloth`}</text>
+										<p>{`Please select the cloth`}</p>
 									</div>
 									{
-										(generative || openpose || humanParser || clothParser) && <div className="max-w-sm text-center">
+										(generative || openpose || humanParser || clothMask) && <div className="max-w-sm text-center">
 											<Swiping
 												alt="result"
 												alts={['openpose', 'human-parser', 'cloth-parser']}
-												imageSrc={generative ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(readLocalStorage<Generative>(generative.id)?.image || [])))}` : ''}
+												imageSrc={generativeImageScaled || ''}
 												imageSrcs={[
-													openpose?.id ? `data:image/jpeg;base64,${btoa(String.fromCharCode(...new Uint8Array(readLocalStorage<Openpose>(openpose.id)?.image || [])))}` : '',
-													humanParserScaled ? humanParserScaled : '',
-													clothParserScaled ? clothParserScaled : '',
+													openposeImageScaled || '',
+													humanParserImageScaled || '',
+													clothMaskImageScaled || '',
 												]}
 												loading={loading}
 											/>
-											<text>{`View the generative AI result`}</text>
+											<p>{`View the generative AI result`}</p>
 										</div>
 									}
 								</SwipingContext.Provider>
