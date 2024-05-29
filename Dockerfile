@@ -14,7 +14,9 @@ COPY . .
 # COPY package.json yarn.lock ./
 RUN yarn install
 
-ENV NEXT_PUBLIC_API_URL=http://viton-hd.vistimi.com
+ARG AI_URL
+ENV AI_URL=$AI_URL
+RUN test -n "$AI_URL"
 RUN yarn build
 
 #-----------------

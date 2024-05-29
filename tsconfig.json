@@ -1,7 +1,6 @@
 {
+  // "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    // "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
@@ -13,48 +12,31 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    // "module": "esnext",
-    // "moduleResolution": "bundler",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    // "types": [
-    //   "bun-types"
-    // ],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@pages/*": [
-        "pages/*"
+      "@/*": [
+        "./src/*"
       ],
-      "@components/*": [
-        "components/*"
-      ],
-      "@services/*": [
-        "services/*"
-      ],
-      "@styles/*": [
-        "styles/*"
-      ],
-      "@public/*": [
-        "public/*"
-      ],
-      "@util/*": [
-        "util/*"
-      ]
     },
     "incremental": true,
   },
-  "include": [
-    "next-env.d.ts",
+
+  "include": [    
     "**/*.ts",
     "**/*.tsx",
+    "next-env.d.ts",
     ".next/types/**/*.ts",
     "types/environment.d.ts",
   ],

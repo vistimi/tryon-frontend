@@ -2,31 +2,42 @@
   "name": "tryon-frontend",
   "version": "0.0.1",
   "description": "",
-  "main": "index.tsx",
+  "private": true,
+  "main": "src/app/page.tsx",
+  "repository": "git@github.com:vistimi/tryon-frontend.git",
+  "author": "KookaS <olivier.charrez@gmail.com>",
+  "license": "MIT",
   "dependencies": {
+    "@nextui-org/react": "^2.3.6",
     "cssnano": "^6.0.1",
-    "next": "^13.5.2",
-    "next-runtime-env": "^1.6.2",
+    "framer-motion": "^10.16.16",
+    "next": "^13.4.19",
+    "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ts-results": "^3.3.0",
-    "sharp": "^0.32.6"
+    "sharp": "^0.32.0",
+    "ts-results-es": "^4.1.0"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.6.3",
     "@types/react": "^18",
     "@types/react-dom": "18.2.8",
     "autoprefixer": "^10.4.16",
+    "build-serverless-next": "0.2.20",
     "eslint": "^8.36.0",
-    "eslint-config-next": "^13.2.4",
+    "eslint-config-next": "^14.0.2",
     "postcss": "^8.4.30",
     "tailwindcss": "^3.3.3",
-    "typescript": "latest"
+    "typescript": "5.4.5"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "install:dev": "yarn install",
+    "install:prod": "yarn install --production",
+    "build-serverless-next": "yarn install:dev; build-serverless-next; yarn install:prod"
   }
 }
