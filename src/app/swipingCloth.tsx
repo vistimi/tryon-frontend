@@ -35,12 +35,11 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
         const { clothMask, clothMaskFormat } = await swipeCloth(swiping)
         if (clothMask != null && clothMaskFormat != null) {
             setLocalStorage(keyClothParser, { image: clothMask, format: clothMaskFormat })
-            setClothParser({ id: keyClothParser, timestamp: new Date().toISOString() })
+            setClothParser({ id: keyClothParser, idx: new Date().toISOString() })
         } else {
             setClothParser(null)
             removeLocalStorage(keyClothParser)
-        }        
-        
+        }
 
         let openposeNew = openpose != null ? readLocalStorage<Openpose>(openpose.id) : null
         let humanParserNew = humanParser != null ? readLocalStorage<Human>(humanParser.id) : null
@@ -55,21 +54,20 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
                 setOpenpose(null)
                 removeLocalStorage(keyOpenpose)
             }
-
             
-            if (humanParser != null) {
-                humanParserNew = humanParser
+            if (humanParser != null && humanParserFormat != null) {
+                humanParserNew = {image: humanParser, format: humanParserFormat}
                 setHumanParser({ id: keyHumanParser, timestamp: new Date().toISOString() })
                 setLocalStorage(keyHumanParser, { image: humanParser, format: humanParserFormat })
             } else {
                 setHumanParser(null)
                 removeLocalStorage(keyHumanParser)
             }
-            
         }
 
         if (openposeNew != null && humanParserNew != null && clothMask != null) {
             // FIXME: first gen has one thing undefined
+            console.log("openposeNew.image, openposeNew.label, humanParserNew.image, clothMask, swiping.idxHuman, swiping.idxCloth", openposeNew.image, openposeNew.label, humanParserNew.image, clothMask, swiping.idxHuman, swiping.idxCloth)
             const { generative, generativeFormat } = await swipeGenerative(openposeNew.image, openposeNew.label, humanParserNew.image, clothMask, swiping.idxHuman, swiping.idxCloth)
             if (generative != null) {
                 setGenerative({ id: keyGenerative, timestamp: new Date().toISOString() })

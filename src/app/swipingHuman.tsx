@@ -40,7 +40,7 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
             setOpenpose(null)
             removeLocalStorage(keyOpenpose)
         }
-        if (humanParser != null) {
+        if (humanParser != null && humanParserFormat != null) {
             setHumanParser({ id: keyHumanParser, timestamp: new Date().toISOString() })
             setLocalStorage(keyHumanParser, { image: humanParser, format: humanParserFormat })
         } else {
@@ -61,8 +61,9 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
             }
         }
 
-        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {$
+        if (openpose != null && openposeLabel != null && humanParser != null && clothParserNew != null) {
             // FIXME: first gen has one thing undefined
+            console.log("openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth", openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth)
             const { generative, generativeFormat } = await swipeGenerative(openpose, openposeLabel, humanParser, clothParserNew.image, swiping.idxHuman, swiping.idxCloth)
             if (generative != null) {
                 setGenerative({ id: keyGenerative, timestamp: new Date().toISOString() })
