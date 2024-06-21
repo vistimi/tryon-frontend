@@ -61,7 +61,6 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
         }
 
         // Generative
-        console.log(openposeImage, openposeLabel, humanParserImage, clothMaskNew?.image, swiping.idxHuman, swiping.idxCloth)
         if (openposeImage != null && openposeLabel != null && humanParserImage != null && clothMaskNew != null) {
             
             const { generativeImage, generativeImageFormat } = await swipeGenerative(openposeImage, openposeLabel, humanParserImage, clothMaskNew.image, swiping.idxHuman, swiping.idxCloth)

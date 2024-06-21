@@ -11,6 +11,4 @@ COMPANY_REF=vm
 REPO_REF=to
 BRANCH_REF=prod
 DOMAIN_NAME=vistimi.com
-
-AI_URL=https://ai.vistimi.com
 ```

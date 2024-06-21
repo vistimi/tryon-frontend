@@ -31,9 +31,9 @@ variable "vpc" {
 
 variable "microservice" {
   type = object({
-    bucket_env = object({
-      content     = string
-    })
+    # bucket_env = object({
+    #   content     = string
+    # })
     orchestrator = object({
       group = object({
         name = string
@@ -120,6 +120,42 @@ variable "microservice" {
             type   = "ON_DEMAND"
             weight = 1
           }])
+
+          asg = optional(object({
+            instance_refresh = optional(object({
+              strategy = string
+              preferences = optional(object({
+                checkpoint_delay             = optional(number)
+                checkpoint_percentages       = optional(list(number))
+                instance_warmup              = optional(number)
+                min_healthy_percentage       = optional(number)
+                skip_matching                = optional(bool)
+                auto_rollback                = optional(bool)
+                scale_in_protected_instances = optional(string)
+                standby_instances            = optional(string)
+              }))
+              triggers = optional(list(string))
+            }))
+            initial_lifecycle_hooks = optional(list(object({
+              name                    = string
+              default_result          = string
+              heartbeat_timeout       = number
+              notification_target     = string
+              lifecycle_transition    = string
+              notification_metadata   = optional(string)
+              notification_target_arn = optional(string)
+              role_arn                = optional(string)
+            })))
+            schedules = optional(map(object({
+              min_size         = optional(number)
+              max_size         = optional(number)
+              desired_capacity = optional(number)
+              recurrence       = optional(string)
+              start_time       = optional(string)
+              end_time         = optional(string)
+              time_zone        = optional(string)
+            })))
+          }))
         }))
         fargate = optional(object({
           os           = string

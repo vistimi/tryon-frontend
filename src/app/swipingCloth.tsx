@@ -62,7 +62,6 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
         }
 
         // Generative
-        console.log(openposeNew?.image, openposeNew?.label, humanParserNew?.image, clothMaskImageNew, swiping.idxHuman, swiping.idxCloth)
         if (openposeNew != null && humanParserNew != null && clothMaskImageNew != null) {
             
             const { generativeImage, generativeImageFormat } = await swipeGenerative(openposeNew.image, openposeNew.label, humanParserNew.image, clothMaskImageNew, swiping.idxHuman, swiping.idxCloth)
@@ -107,7 +106,6 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     }
 
     const getId = (imageType: "human" | "cloth", idx: number, increment: number = 0) => {
-        // console.log(imageType, idx, fileNames[imageType][getIdx(idx + increment)])
         return fileNames[imageType][getIdx(idx + increment)]
     }
 

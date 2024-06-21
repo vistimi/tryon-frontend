@@ -14,9 +14,6 @@ COPY . .
 # COPY package.json yarn.lock ./
 RUN yarn install
 
-ARG AI_URL
-ENV AI_URL=$AI_URL
-RUN test -n "$AI_URL"
 RUN yarn build
 
 #-----------------

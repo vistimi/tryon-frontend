@@ -104,18 +104,17 @@ inputs = {
   }
 
   microservice = {
-    bucket_env = {
-      content = <<EOT
-AI_URL=${get_env("AI_URL")}
-EOT
-    }
+#     bucket_env = {
+#       content = <<EOT
+# EOT
+#     }
     orchestrator = {
       group = {
         name = "ui"
         deployment = {
-          min_size     = local.production ? 1 : 1
-          max_size     = local.production ? 1 : 1
-          desired_size = local.production ? 1 : 1
+          min_size     = 1
+          max_size     = 1
+          desired_size = 1
 
           containers = [
             {
@@ -138,9 +137,7 @@ EOT
                   })
                 }
                 build = {
-                  args = {
-                    AI_URL                = get_env("AI_URL")
-                  }
+                  args = {}
                   context_path = local.root_path
                   file_path    = "Dockerfile" # file_path from the context_path
                   path_include = ["**/src/**", "**/public/**"] # add config files
@@ -172,15 +169,24 @@ EOT
           capacities = [{
             type = "ON_DEMAND"
           }]
-          # schedules = {
-          #   go-offline-at-rds-rotation = {
-          #     min_size         = 0
-          #     max_size         = 0
-          #     desired_capacity = 0
-          #     start_time       = "0 1 1 * ? *" # every month the 1st at 1am
-          #     end_time         = "30 1 1 * ? *" # every month the 1st at 1:30am
-          #   }
-          # }
+          asg = {
+            schedules = {
+              night = {
+                min_size         = 0
+                max_size         = 0
+                desired_capacity = 0
+                recurrence       = "0 16 * * 1-5" # Mon-Fri in the evening
+                time_zone        = "Europe/Zurich" # default UTC
+              },
+              morning = {
+                min_size     = 1
+                max_size     = 1
+                desired_capacity = 1
+                recurrence       = "0 13 * * 1-5" # Mon-Fri in the morning
+                time_zone        = "Europe/Zurich" # default UTC
+              },
+            }
+          }
         }
       }
       ecs = {}

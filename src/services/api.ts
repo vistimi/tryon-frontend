@@ -1,34 +1,32 @@
 // 'use client';
 
+import { aiConfig, AiConfig } from '@/config/ai';
 import { Ok, Err, Result } from 'ts-results-es';
 
 export class Api {
 
-    public static host: string;
+    public static conf: AiConfig;
 
     constructor() {
-        const uri = process.env.AI_URL
-        if (!uri) {
+        const conf = aiConfig;
+
+        if (!conf) {
             throw new Error('Api host is not set')
         }
-        Api.host = uri;
+        Api.conf = conf;
     }
 
     /** Functions general */
 
-    public hostName = () => {
-        return Api.host;
-    }
-
-    private handleRequest = async (path: string, requestOptions: RequestInit): Promise<Result<any, string>> => {
+    private handleRequest = async (url: string, requestOptions: RequestInit): Promise<Result<any, string>> => {
         let res: Response;
         try {
-            res = await fetch(`${Api.host}${path}`, { 
+            res = await fetch(url, { 
                 ...requestOptions,
             });
         } catch (error) {
             if (error instanceof Error) {
-                return Err(`fetch error: ${error.message}, url: ${Api.host}${path}, requestOptions: ${JSON.stringify(requestOptions, null, 2)}`)
+                return Err(`fetch error: ${error.message}, url: ${url}, requestOptions: ${JSON.stringify(requestOptions, null, 2)}`)
             }
             return Err(JSON.stringify(error))
         }
@@ -187,34 +185,89 @@ export class Api {
     // };
 
     /** AI */
+    // public parserHuman = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
+    //     if (!Array.isArray(image)) {
+    //         return Err(`Image must be a list, image ${typeof image}`);
+    //     }
+    //     return await this.post(`${Api.conf.humanParser.inference}/predictions/unet`, undefined, undefined, { image: image, image_format: 'jpeg' })
+    // };
+    // public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
+    //     return await this.get(`${Api.conf.humanParser.inference}/ping`, undefined, undefined)
+    // };
+
+    // public parserCloth = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
+    //     if (!Array.isArray(image)) {
+    //         return Err(`Image must be a list, image ${typeof image}`);
+    //     }
+    //     return await this.post(`${Api.conf.clothMask.inference}/predictions/unet`, undefined, undefined, { image: image, image_format: 'jpeg' })
+    // };
+    // public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
+    //     return await this.get(`${Api.conf.clothMask.inference}/ping`, undefined, undefined)
+    // };
+
+    // public openpose = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string, label: any}, string>> => {
+    //     if (!Array.isArray(image)) {
+    //         return Err(`Image must be a list, image ${typeof image}`);
+    //     }
+    //     return await this.post(`${Api.conf.openpose.inference}/predictions/openpose`, undefined, undefined, { image: image, image_format: 'jpeg', output_image_quality: 50, })
+    // };
+    // public openposePing = async (): Promise<Result<{message: string}, string>> => {
+    //     return await this.get(`${Api.conf.openpose.inference}/ping`, undefined, undefined)
+    // };
+
+    // public generative = async (
+    //     pose_rgb: number[],
+    //     pose_label: number[],
+    //     human_rgb: number[],
+    //     human_parse: number[],
+    //     cloth_rgb: number[],
+    //     cloth_mask: number[],
+    // ): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
+    //     // if (!Array.isArray(pose_rgb) || !Array.isArray(pose_label) || !Array.isArray(human_rgb) || !Array.isArray(human_parse) || !Array.isArray(cloth_rgb) || !Array.isArray(cloth_mask)){
+    //     //     return Err(`Image must be a list, pose_rgb ${typeof pose_rgb}, pose_label ${typeof pose_label}, human_rgb ${typeof human_rgb}, human_parse ${typeof human_parse}, cloth_rgb ${typeof cloth_rgb}, cloth_mask ${typeof cloth_mask}`);
+    //     // }
+    //     return await this.post(`${Api.conf.vton.inference}/wfpredict/vton-hd`, undefined, undefined, { 
+    //         pose_rgb,
+    //         pose_label,
+    //         human_rgb,
+    //         human_parse,
+    //         cloth_rgb,
+    //         cloth_mask,
+    //         output_image_quality: 20,
+    //     })
+    // };
+    // public generativePing = async (): Promise<Result<{message: string}, string>> => {
+    //     return await this.get(`${Api.conf.vton.inference}/ping`, undefined, undefined)
+    // };
+
     public parserHuman = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8082/prediction`, undefined, undefined, { image: image, image_format: 'jpeg' })
+        return await this.post(`${Api.conf.humanParser}/prediction`, undefined, undefined, { image: image, image_format: 'jpeg' })
     };
     public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
-        return await this.get(`:8082/ping`, undefined, undefined)
+        return await this.get(`${Api.conf.humanParser}/ping`, undefined, undefined)
     };
 
     public parserCloth = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8083/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', 'normalize': true })
+        return await this.post(`${Api.conf.clothMask}/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', 'normalize': true })
     };
     public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
-        return await this.get(`:8083/ping`, undefined, undefined)
+        return await this.get(`${Api.conf.clothMask}/ping`, undefined, undefined)
     };
 
     public openpose = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string, label: any}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
-        return await this.post(`:8081/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', output_image_quality: 50, })
+        return await this.post(`${Api.conf.openpose}/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', output_image_quality: 50, })
     };
     public openposePing = async (): Promise<Result<{message: string}, string>> => {
-        return await this.get(`:8081/ping`, undefined, undefined)
+        return await this.get(`${Api.conf.openpose}/ping`, undefined, undefined)
     };
 
     public generative = async (
@@ -228,7 +281,7 @@ export class Api {
         // if (!Array.isArray(pose_rgb) || !Array.isArray(pose_label) || !Array.isArray(human_rgb) || !Array.isArray(human_parse) || !Array.isArray(cloth_rgb) || !Array.isArray(cloth_mask)){
         //     return Err(`Image must be a list, pose_rgb ${typeof pose_rgb}, pose_label ${typeof pose_label}, human_rgb ${typeof human_rgb}, human_parse ${typeof human_parse}, cloth_rgb ${typeof cloth_rgb}, cloth_mask ${typeof cloth_mask}`);
         // }
-        return await this.post(`:8080/prediction`, undefined, undefined, { 
+        return await this.post(`${Api.conf.vton}/prediction`, undefined, undefined, { 
             pose_rgb,
             pose_label,
             human_rgb,
@@ -239,6 +292,6 @@ export class Api {
         })
     };
     public generativePing = async (): Promise<Result<{message: string}, string>> => {
-        return await this.get(`:8080/ping`, undefined, undefined)
+        return await this.get(`${Api.conf.vton}/ping`, undefined, undefined)
     };
 }
