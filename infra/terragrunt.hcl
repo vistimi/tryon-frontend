@@ -175,7 +175,7 @@ inputs = {
                 min_size         = 0
                 max_size         = 0
                 desired_capacity = 0
-                recurrence       = "0 16 * * 1-5" # Mon-Fri in the evening
+                recurrence       = "0 17 * * 1-5" # Mon-Fri in the evening
                 time_zone        = "Europe/Zurich" # default UTC
               },
               morning = {
