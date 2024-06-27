@@ -29,7 +29,8 @@ export default function Home() {
 	useEffect(() => {
 		const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'CET' }));
 		const hour = now.getHours()
-		if (hour < 10 || hour > 17) {
+		// starting from 10am to 5pm
+		if (hour < 10 || hour >= 17) {
 			onOpen();
 		}
 	}, [])
