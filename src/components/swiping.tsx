@@ -16,7 +16,7 @@ export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRigh
         <div className="p-2 grid grid-cols-1" >
             <div className="p-2 grid grid-cols-10" >
                 {!loading && swipeLeft ? <svg
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="black"
                     className="z-10 row-span-full col-start-1 col-end-2 self-center w-8 h-8 transition-transform transform hover:scale-110 text-black"
                     onClick={swipeLeft}
                 >
@@ -37,7 +37,7 @@ export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRigh
                 />
 
                 {!loading && swipeRight ? <svg
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="black"
                     className="z-10 row-span-full col-start-10 col-end-11 self-center w-8 h-8 transition-transform transform hover:scale-110 text-black"
                     onClick={swipeRight}
                 >

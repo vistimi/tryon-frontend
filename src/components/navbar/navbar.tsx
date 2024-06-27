@@ -61,9 +61,9 @@ export const NavbarWeb = () => {
 			>
 
 				{/* {Darkmode button} */}
-				<NavbarItem className="flex gap-2">
+				{/* <NavbarItem className="flex gap-2">
 					<ThemeSwitch />
-				</NavbarItem>
+				</NavbarItem> */}
 
 			</NavbarContent>
 

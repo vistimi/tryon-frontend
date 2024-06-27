@@ -84,14 +84,22 @@ variable "microservice" {
                 protocol         = string
                 port             = optional(number)
                 protocol_version = optional(string)
+                redirect = optional(object({
+                  host        = optional(string)
+                  path        = optional(string)
+                  port        = optional(number)
+                  protocol    = optional(string)
+                  query       = optional(string)
+                  status_code = optional(number)
+                }))
               })
-              target = object({
+              target = optional(object({
                 protocol          = optional(string)
                 port              = number
                 protocol_version  = optional(string)
                 health_check_path = optional(string)
                 status_code       = optional(string)
-              })
+              }))
             })), [])
             command                  = optional(list(string), [])
             entrypoint               = optional(list(string), [])

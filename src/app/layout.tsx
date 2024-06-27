@@ -40,7 +40,7 @@ export default function RootLayout({
 		<html lang="en">
 			<head/>
 			<body
-				className="text-foreground bg-background min-h-screen font-sans max-w"
+				className="text-foreground bg-background min-h-screen font-sans font-normal text-base max-w light"
 			>
 				<Providers>
 					<NavbarWeb/>

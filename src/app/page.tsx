@@ -10,6 +10,10 @@ import { Swiping } from "@/components/swiping";
 import { readLocalStorage } from "@/util/localstorage";
 import usePersistState from "@/util/hooks/usePersistState";
 import { Cloth, Generative, Human, Openpose } from "@/types/ai";
+import {useDisclosure} from "@nextui-org/react";
+import { ModalMessage } from "@/components/global/modal";
+import {Divider} from "@nextui-org/divider";
+
 
 export default function Home() {
 	const [swiping, setSwiping] = usePersistState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 }, 'idx')
@@ -19,6 +23,16 @@ export default function Home() {
 	const [humanParser, setHumanParser] = useState<ImageContextHumanParser>({id: 'human-parser'})
 	const [clothMask, setClothMask] = useState<ImageContextclothMask>({id: 'cloth-parser'})
 	const [generative, setGenerative] = useState<ImageContextGenerative>({id: 'generative'})
+
+	
+	const {isOpen, onOpen, onOpenChange} = useDisclosure();
+	useEffect(() => {
+		const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'CET' }));
+		const hour = now.getHours()
+		if (hour < 10 || hour > 17) {
+			onOpen();
+		}
+	}, [])
 
 	const formatImage = (data: number[], scale?:boolean): Promise<null | string> => {
 		return new Promise((resolve, reject) => {
@@ -114,6 +128,13 @@ export default function Home() {
 				</Head> */}
 
 				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center flex flex-col md:flex-row">
+						<ModalMessage
+							isOpen={isOpen} onOpenChange={onOpenChange}
+							title="Please come back another time!"
+							message={<p>
+								The service is currently unavailable, the <strong>demo</strong> is only available every <strong>Monday to Friday</strong>, from <strong>10am to 5pm CET</strong> (Central European Time). Thank you for your understanding.
+							</p>}
+						/>
 						<ImageContext.Provider 
 							value={{
 								openpose, setOpenpose,								
@@ -125,17 +146,18 @@ export default function Home() {
 							<LoadingContext.Provider value={{ loading, setLoading }}>
 								<SwipingContext.Provider value={{ swiping, setSwiping }}>
 									<div className="max-w-sm text-center">
-										<SwipingHuman />
-										<p>{`Please select the model`}</p>
+										<p className="font-semibold">Please select the model</p>
+										<SwipingHuman />										
 									</div>
-									<div className="max-w-sm text-center">										
-										<SwipingCloth />
-										<p>{`Please select the cloth`}</p>
+									<div className="max-w-sm text-center">
+										<p className="font-semibold">Please select the clothe</p>
+										<SwipingCloth />										
 									</div>
 									{
 										(generative || openpose || humanParser || clothMask) && <div className="max-w-sm text-center">
+											<p className="font-semibold">Below is your generated AI</p>
 											<Swiping
-												alt="result"
+												alt="generative"
 												alts={['openpose', 'human-parser', 'cloth-parser']}
 												imageSrc={generativeImageScaled || ''}
 												imageSrcs={[
@@ -144,8 +166,7 @@ export default function Home() {
 													clothMaskImageScaled || '',
 												]}
 												loading={loading}
-											/>
-											<p>{`View the generative AI result`}</p>
+											/>											
 										</div>
 									}
 								</SwipingContext.Provider>
@@ -153,6 +174,11 @@ export default function Home() {
 						</ImageContext.Provider>
 				</div>
 			</div >
+
+			<Divider className="my-4" />
+
+			<p>This is just a <strong>demo</strong>, it does not handle a lot of requests. Other people might also be using it at the same time. Please be patient.</p>
+			<p>The demo is only available every <strong>Monday to Friday</strong>, from <strong>10am to 5pm CET</strong> (Central European Time). Thank you for your understanding.</p>
 		</section>
 	);
 }

@@ -9,10 +9,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        mono: ["var(--font-mono)"],
-        mr: ["var(--font-mr)"],
-      },
+      // fontFamily: {
+      //   mono: ["var(--font-mono)"],
+      //   mr: ["var(--font-mr)"],
+      // },
       colors: {
         primary: "#b80000",
         // primary: {

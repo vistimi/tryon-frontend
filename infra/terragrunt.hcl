@@ -156,6 +156,16 @@ inputs = {
                     health_check_path = "/"    # if not specified, the health_check_path will be "/"
                   }
                 },
+                {
+                  listener = {
+                    protocol = "http"
+                    redirect = {
+                      port        = 443
+                      protocol    = "https"
+                      status_code = 301
+                    }
+                  }
+                },
               ]
               readonly_root_filesystem = false
             }
@@ -169,24 +179,24 @@ inputs = {
           capacities = [{
             type = "ON_DEMAND"
           }]
-          asg = {
-            schedules = {
-              night = {
-                min_size         = 0
-                max_size         = 0
-                desired_capacity = 0
-                recurrence       = "0 17 * * 1-5" # Mon-Fri in the evening
-                time_zone        = "Europe/Zurich" # default UTC
-              },
-              morning = {
-                min_size     = 1
-                max_size     = 1
-                desired_capacity = 1
-                recurrence       = "0 13 * * 1-5" # Mon-Fri in the morning
-                time_zone        = "Europe/Zurich" # default UTC
-              },
-            }
-          }
+          # asg = {
+          #   schedules = {
+          #     night = {
+          #       min_size         = 0
+          #       max_size         = 0
+          #       desired_capacity = 0
+          #       recurrence       = "0 17 * * 1-5" # Mon-Fri in the evening
+          #       time_zone        = "Europe/Zurich" # default UTC
+          #     },
+          #     morning = {
+          #       min_size     = 1
+          #       max_size     = 1
+          #       desired_capacity = 1
+          #       recurrence       = "0 13 * * 1-5" # Mon-Fri in the morning
+          #       time_zone        = "Europe/Zurich" # default UTC
+          #     },
+          #   }
+          # }
         }
       }
       ecs = {}
