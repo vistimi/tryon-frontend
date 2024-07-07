@@ -14,6 +14,7 @@ import {useDisclosure} from "@nextui-org/react";
 import { ModalMessage } from "@/components/global/modal";
 import {Divider} from "@nextui-org/divider";
 
+import {clothMask as clothMaskFirst, humanParser as humanParserFirst, openpose as openposeFirst, generative as generativeFirst} from "./10549_00_11351_00"
 
 export default function Home() {
 	const [swiping, setSwiping] = usePersistState<SwipingContextState>({ idxHuman: 0, idxCloth: 0 }, 'idx')
@@ -28,9 +29,10 @@ export default function Home() {
 	const {isOpen, onOpen, onOpenChange} = useDisclosure();
 	useEffect(() => {
 		const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'CET' }));
+		const day = now.getDay();
 		const hour = now.getHours()
-		// starting from 10am to 5pm
-		if (hour < 10 || hour >= 17) {
+		// Monday to Friday from 10am to 5pm
+		if (day == 0 || day == 6 || hour < 10 || hour >= 17) {
 			onOpen();
 		}
 	}, [])
@@ -77,16 +79,17 @@ export default function Home() {
 		});
 	}
 
-	const [humanParserImageScaled, setHumanParserImageScaled] = useState<null|string>(null)
-	const [clothMaskImageScaled, setClothMaskImageScaled] = useState<null|string>(null)
-	const [openposeImageScaled, setOpenposeImageScaled] = useState<null|string>(null)
-	const [generativeImageScaled, setGenerativeImageScaled] = useState<null|string>(null)
-	useEffect(() => {		
+	const [humanParserImageScaled, setHumanParserImageScaled] = useState<null|string>(humanParserFirst)
+	const [clothMaskImageScaled, setClothMaskImageScaled] = useState<null|string>(clothMaskFirst)
+	const [openposeImageScaled, setOpenposeImageScaled] = useState<null|string>(openposeFirst)
+	const [generativeImageScaled, setGenerativeImageScaled] = useState<null|string>(generativeFirst)
+	useEffect(() => {
 		(async () => {
 			const data = readLocalStorage<Human>(humanParser.id)?.image
 			if (!data) return
 			const base64Image = await formatImage(data, true)
 			setHumanParserImageScaled(base64Image)
+			// console.log('humanParser', base64Image)
 		})()
 	}, [humanParser])
 	useEffect(() => {
@@ -95,6 +98,7 @@ export default function Home() {
 			if (!data) return
 			const base64Image = await formatImage(data)
 			setClothMaskImageScaled(base64Image)
+			// console.log('clothMask', base64Image)
 		})()
 	}, [clothMask])
 	useEffect(() => {
@@ -103,6 +107,7 @@ export default function Home() {
 			if (!data) return
 			const base64Image = await formatImage(data)
 			setOpenposeImageScaled(base64Image)
+			// console.log('openpose', base64Image)
 		})()		
 	}, [openpose])
 	useEffect(() => {
@@ -111,31 +116,38 @@ export default function Home() {
 			if (!data) return
 			const base64Image = await formatImage(data)
 			setGenerativeImageScaled(base64Image)
+			// console.log('generative', base64Image)
 		})()		
 	}, [generative])
 
 	return (
 		<section className="flex flex-col">
-			<div className="flex items-center">
-				{/* <Head>
-					<title>Try-on</title>
-					<meta name="description" content="Checkout our try-on" key="desc" />
-					<meta property="og:title" content="Try-on" />
-					<meta
-					property="og:description"
-					content=""
-					/>
-					<meta property="og:image" content="https://example.com/images/cool-page.jpg" />
-				</Head> */}
+			{/* <Head>
+				<title>Try-on</title>
+				<meta name="description" content="Checkout our try-on" key="desc" />
+				<meta property="og:title" content="Try-on" />
+				<meta
+				property="og:description"
+				content=""
+				/>
+				<meta property="og:image" content="https://example.com/images/cool-page.jpg" />
+			</Head> */}
 
+
+			<ModalMessage
+				isOpen={isOpen} onOpenChange={onOpenChange}
+				title="Please come back another time!"
+				message={<p>
+					The service is currently unavailable, the <strong>demo</strong> is only available every <strong>Monday to Friday</strong>, from <strong>10am to 5pm CET</strong> (Central European Time). Thank you for your understanding.
+				</p>}
+			/>
+
+			<p>Select a model or cloth by clicking on the arrow on the images below.</p>
+			<br/>
+
+			<div className="flex items-center">
 				<div className="align-middle max-w-screen-2xl bg-default-100 rounded-xl shadow-md items-center flex flex-col md:flex-row">
-						<ModalMessage
-							isOpen={isOpen} onOpenChange={onOpenChange}
-							title="Please come back another time!"
-							message={<p>
-								The service is currently unavailable, the <strong>demo</strong> is only available every <strong>Monday to Friday</strong>, from <strong>10am to 5pm CET</strong> (Central European Time). Thank you for your understanding.
-							</p>}
-						/>
+						
 						<ImageContext.Provider 
 							value={{
 								openpose, setOpenpose,								
@@ -152,7 +164,7 @@ export default function Home() {
 									</div>
 									<div className="max-w-sm text-center">
 										<p className="font-semibold">Please select the clothe</p>
-										<SwipingCloth />										
+										<SwipingCloth />
 									</div>
 									{
 										(generative || openpose || humanParser || clothMask) && <div className="max-w-sm text-center">

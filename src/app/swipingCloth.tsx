@@ -1,6 +1,6 @@
 'use client'
 
-import { MouseEvent, useContext } from "react"
+import { ChangeEvent, MouseEvent, useContext } from "react"
 import { Swiping } from "@/components/swiping";
 import { SwipingContext, SwipingContextState } from "@/components/context/swiping";
 import { LoadingContext } from "@/components/context/loading";
@@ -23,6 +23,14 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     } = useContext(ImageContext);
     const imageType = 'cloth'
 
+    const imageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files) {
+            return
+        }
+        const file = URL.createObjectURL(event.target.files[0])
+        setSwiping(swiping => ({ ...swiping, clothFile: file}));
+    }
+
     const swipe = async (swiping: SwipingContextState) => {
         setLoading(true)
 
@@ -33,7 +41,7 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
             setClothMask({ ...clothMask})
         } else {
             removeLocalStorage(clothMask.id)
-            setClothMask({ ...clothMask})            
+            setClothMask({ ...clothMask}) // TODO: weird flow
         }
 
         // Human Parser and Openpose
@@ -57,14 +65,14 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
                 setHumanParser({...humanParser})
             } else {
                 removeLocalStorage(humanParser.id)
-                setHumanParser({...humanParser})                
+                setHumanParser({...humanParser})
             }
         }
 
         // Generative
         if (openposeNew != null && humanParserNew != null && clothMaskImageNew != null) {
             
-            const { generativeImage, generativeImageFormat } = await swipeGenerative(openposeNew.image, openposeNew.label, humanParserNew.image, clothMaskImageNew, swiping.idxHuman, swiping.idxCloth)
+            const { generativeImage, generativeImageFormat } = await swipeGenerative(openposeNew.image, openposeNew.label, humanParserNew.image, clothMaskImageNew, swiping.idxHuman, swiping.humanFile, swiping.idxCloth, swiping.clothFile)
             if (generativeImage != null && generativeImageFormat != null) {                
                 setLocalStorage(generative.id, { image: generativeImage, format: generativeImageFormat })
                 setGenerative({ ...generative})
@@ -80,20 +88,18 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
     }
     
     const fileNames = {
-        'human': ["00891_00", "03615_00", "07445_00", "07573_00", "08909_00", "10549_00"],
-        'cloth': ["01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00", "11351_00", "11791_00"],
+        'human': ["10549_00", "00891_00", "03615_00", "07445_00", "07573_00", "08909_00"],
+        'cloth': ["11351_00", "11791_00", "01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00"],
     }
 
     const swipeLeft = (event: MouseEvent<SVGSVGElement>) => {
         const swipingNew = { ...swiping, idxCloth: getIdx(swiping.idxCloth - 1) }
         swipe(swipingNew)
-        setSwiping(swipingNew)
     }
 
     const swipeRight = (event: MouseEvent<SVGSVGElement>) => {
         const swipingNew = { ...swiping, idxCloth: getIdx(swiping.idxCloth + 1) }
         swipe(swipingNew)
-        setSwiping(swipingNew)
     }
 
     const getIdx = (idx: number) => {
@@ -123,6 +129,8 @@ export const SwipingCloth = ({}: SwipingClothProps) => {
                 loading={loading}
                 swipeLeft={swipeLeft}
                 swipeRight={swipeRight}
+                file={swiping.clothFile}
+                imageUpload={imageUpload}
             />
         </NoSsr>
     );

@@ -5,8 +5,8 @@ import { ParserHumanPostBody, ParserHumanPostResponse } from "./api/parserHuman/
 import { OpenposePostBody, OpenposePostResponse } from "./api/openpose/route"
 
 const fileNames = {
-    'human': ["00891_00", "03615_00", "07445_00", "07573_00", "08909_00", "10549_00"],
-    'cloth': ["01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00", "11351_00", "11791_00"],
+    'human': ["10549_00", "00891_00", "03615_00", "07445_00", "07573_00", "08909_00"],
+    'cloth': ["11351_00", "11791_00", "01260_00", "01430_00", "02783_00", "03751_00", "06429_00", "06802_00", "07429_00", "08348_00", "09933_00", "11028_00"],
 }
 
 export const swipeCloth = async (swiping: SwipingContextState) => {
@@ -94,11 +94,19 @@ export const swipeGenerative = async (
     openposeLabel: number[],
     humanParser: number[],
     clothMask: number[],
-    idxHuman: number,
-    idxCloth: number,
+    idxHuman?: number,
+    humanFile?: string,
+    idxCloth?: number,
+    clothFile?: string,
 ) => {
-    const clothId = fileNames['cloth'][idxCloth]
-    const humanId = fileNames['human'][idxHuman]
+    if ((!idxHuman && !humanFile) || (idxHuman && humanFile)) {
+        console.error('resultGenerative', 'human_id or human_rgb')
+        return { generativeImage: null, generativeImageFormat: null }
+    }
+    if ((!idxCloth && !clothFile) || (idxCloth && clothFile)) {
+        console.error('resultGenerative', 'cloth_id or cloth_rgb')
+        return { generativeImage: null, generativeImageFormat: null }
+    }
 
     // const resultGenerative = await api.generative(openpose, openposeLabel, image, humanParser, cloth, clothMaskImage)
     // if (resultGenerative.isOk()) {
@@ -110,10 +118,12 @@ export const swipeGenerative = async (
     const bodyGenerative: GenerativePostBody = {
         pose_rgb: openpose,
         pose_label: openposeLabel,
-        human_id: humanId,
+        human_id: idxHuman ? fileNames['human'][idxHuman] : undefined,
         human_parse: humanParser,
-        cloth_id: clothId,
+        cloth_id: idxCloth ? fileNames['cloth'][idxCloth] : undefined,
         cloth_mask: clothMask,
+        human_file: humanFile,
+        cloth_file: clothFile,
     }
     const resultGenerative = await fetch('/api/generative', { method: 'POST', body: JSON.stringify(bodyGenerative), headers: {'Content-Type': 'application/json' }});
     if (resultGenerative.ok) {

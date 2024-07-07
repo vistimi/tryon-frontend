@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { LoadingWheel } from "./loadingWheel";
+import { ChangeEvent } from "react";
+import { PlusIcon } from "./icons/plusCircle";
 
 interface SwipingProps {
     alt: string
@@ -9,9 +11,12 @@ interface SwipingProps {
     loading: boolean
     swipeLeft?: (event: any) => void
     swipeRight?: (event: any) => void
+    file?: string
+    imageUpload?: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
-export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRight}: SwipingProps) => {
+export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRight, file, imageUpload}: SwipingProps) => {
+    
     return (
         <div className="p-2 grid grid-cols-1" >
             <div className="p-2 grid grid-cols-10" >
@@ -25,16 +30,55 @@ export const Swiping = ({imageSrcs, imageSrc, alt, loading, swipeLeft, swipeRigh
 
                 {loading ? <div className="z-10 row-span-full col-start-5 col-end-6 self-center"><LoadingWheel /></div> : <></>}
 
-                <Image
-                    className="z-0 w-full h-auto row-span-full col-start-1 col-end-11 self-center object-cover rounded-xl shadow-md flex space-x-1"
-                    src={imageSrc}
-                    alt={alt}
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    quality={50}
-                    priority={false}
-                />
+                {/* Image becomes the input */}
+                {imageUpload ? (
+                    <>
+                        <label
+                            htmlFor="file-upload"
+                            className="
+                                relative group
+                                flex justify-center items-center
+                                row-span-full col-start-1 col-end-11 self-center object-cover
+                            "
+                        >
+                            <Image
+                                className="
+                                    z-0 w-auto h-full rounded-xl shadow-md flex space-x-1
+                                    group-hover:opacity-50 transition-opacity duration-300
+                                "
+                                src={file || imageSrc}
+                                alt={alt}
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                quality={50}
+                                priority={false}
+                            />
+                            <div className="
+                                z-1 absolute flex flex-col justify-center items-center
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                            ">
+                                <PlusIcon size={30}/>
+                                <p className="text-black text-md font-bold">Upload your picture</p>
+                            </div>
+                        </label>
+                        <input id="file-upload" className="hidden" type="file" onChange={imageUpload} />
+                    </>
+                ) : (
+                    <Image
+                        className="
+                            row-span-full col-start-1 col-end-11 self-center object-cover
+                            z-0 w-auto h-full rounded-xl shadow-md flex space-x-1
+                        "
+                        src={file || imageSrc}
+                        alt={alt}
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        quality={50}
+                        priority={false}
+                    />
+                )}                
 
                 {!loading && swipeRight ? <svg
                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="black"
