@@ -1,8 +1,10 @@
 import { Api } from "@/services/api"
 import { loadHuman } from "../load";
+import { decodeJpeg } from "@/util/image";
 
 export interface OpenposePostBody {
-    id: string
+    human_id?: string
+    human_file?: string
 }
 
 export interface OpenposePostResponse {
@@ -22,8 +24,20 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    const human = await loadHuman(json.id)
-    const result = await api.openpose(human);
+    let human_buffer: number[]
+    if (json.human_id && !json.human_file) {
+        human_buffer = await loadHuman(json.human_id)
+        
+    } else if (json.human_file && !json.human_id) {
+        human_buffer = await decodeJpeg(json.human_file) 
+    } else {
+        return Response.json({
+            message: 'Bad Request',
+            error: 'human_id or human_rgb',
+        }, { status: 400 });
+    }
+
+    const result = await api.openpose(human_buffer);
     if (result.isErr()) {
         console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
         return Response.json({
@@ -33,6 +47,7 @@ export async function POST(request: Request) {
     }
     const body: OpenposePostResponse = result.unwrap()
     return Response.json(body, { status: 200 });
+    
 }
 
 export async function GET(request: Request) {

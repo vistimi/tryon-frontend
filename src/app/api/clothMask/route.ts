@@ -1,17 +1,19 @@
 import { Api } from "@/services/api"
-import { loadHuman } from "../load";
+import { loadCloth } from "../load";
+import { decodeJpeg } from "@/util/image";
 
-export interface ParserHumanPostBody {
-    id: string
+export interface ClothMaskPostBody {
+    cloth_id?: string
+    cloth_file?: string
 }
 
-export interface ParserHumanPostResponse {
+export interface ClothMaskPostResponse {
     output_image: number[]
     output_image_format:string
 }
 
 export async function POST(request: Request) {
-    let json: ParserHumanPostBody;
+    let json: ClothMaskPostBody;
     const api = new Api();
     switch (request.headers.get('Content-Type')) {
         case 'application/json':
@@ -21,8 +23,20 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    const human = await loadHuman(json.id)
-    const result = await api.parserHuman(human);
+    let cloth_buffer: number[]
+    if (json.cloth_id && !json.cloth_file) {
+        cloth_buffer = await loadCloth(json.cloth_id)
+        
+    } else if (json.cloth_file && !json.cloth_id) {
+        cloth_buffer = await decodeJpeg(json.cloth_file) 
+    } else {
+        return Response.json({
+            message: 'Bad Request',
+            error: 'cloth_id or cloth_file',
+        }, { status: 400 })
+    }
+
+    const result = await api.clothMask(cloth_buffer);
     if (result.isErr()) {
         console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
         return Response.json({
@@ -30,13 +44,13 @@ export async function POST(request: Request) {
             error: result.unwrapErr(),
         }, { status: 400 })
     }
-    const body: ParserHumanPostResponse = result.unwrap()
+    const body: ClothMaskPostResponse = result.unwrap()
     return Response.json(body, { status: 200 });
 }
 
 export async function GET(request: Request) {
     const api = new Api();
-    const result = await api.parserHumanPing();
+    const result = await api.clothMaskPing();
     if (result.isErr()) {
         console.error(result.unwrapErr(), { headers: request.headers, url: request.url })
         return Response.json({

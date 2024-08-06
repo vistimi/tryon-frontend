@@ -240,23 +240,23 @@ export class Api {
     //     return await this.get(`${Api.conf.vton.inference}/ping`, undefined, undefined)
     // };
 
-    public parserHuman = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
+    public humanParser = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
         return await this.post(`${Api.conf.humanParser}/prediction`, undefined, undefined, { image: image, image_format: 'jpeg' })
     };
-    public parserHumanPing = async (): Promise<Result<{message: string}, string>> => {
+    public humanParserPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`${Api.conf.humanParser}/ping`, undefined, undefined)
     };
 
-    public parserCloth = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
+    public clothMask = async (image: number[]): Promise<Result<{output_image: number[], output_image_format:string}, string>> => {
         if (!Array.isArray(image)) {
             return Err(`Image must be a list, image ${typeof image}`);
         }
         return await this.post(`${Api.conf.clothMask}/prediction`, undefined, undefined, { image: image, image_format: 'jpeg', 'normalize': true })
     };
-    public parserClothPing = async (): Promise<Result<{message: string}, string>> => {
+    public clothMaskPing = async (): Promise<Result<{message: string}, string>> => {
         return await this.get(`${Api.conf.clothMask}/ping`, undefined, undefined)
     };
 

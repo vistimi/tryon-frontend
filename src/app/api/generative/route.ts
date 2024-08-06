@@ -29,40 +29,38 @@ export async function POST(request: Request) {
             return new Response('Unsupported Media Type', { status: 415 });
     }
 
-    // pose_rgb: openpose,
-    // pose_label: openposeLabel,
-    // human_id: humanId,
-    // human_parse: humanParser,
-    // cloth_id: clothId,
-    // cloth_mask: clothMask,
-    let human: number[]
-    if (json.human_id) {
-        human = await loadHuman(json.human_id)
-    } else if (json.human_file) {
-        human = await decodeJpeg(json.human_file)
+    let human_buffer: number[]
+    if (json.human_id && !json.human_file) {
+        human_buffer = await loadHuman(json.human_id)
+        
+    } else if (json.human_file && !json.human_id) {
+        human_buffer = await decodeJpeg(json.human_file) 
     } else {
         return Response.json({
             message: 'Bad Request',
-            error: 'human_id or human_rgb',
-        }, { status: 400 })
+            error: 'human_id or human_file',
+        }, { status: 400 });
     }
-    let cloth: number[]
-    if (json.cloth_id) {
-        cloth = await loadCloth(json.cloth_id)
-    } else if (json.cloth_file) {
-        cloth = await decodeJpeg(json.cloth_file)
+
+    let cloth_buffer: number[]
+    if (json.cloth_id && !json.cloth_file) {
+        cloth_buffer = await loadCloth(json.cloth_id)
+        
+    } else if (json.cloth_file && !json.cloth_id) {
+        cloth_buffer = await decodeJpeg(json.cloth_file) 
     } else {
         return Response.json({
             message: 'Bad Request',
-            error: 'cloth_id or cloth_rgb',
+            error: 'cloth_id or cloth_file',
         }, { status: 400 })
     }
+
     const result = await api.generative(
         json.pose_rgb,
         json.pose_label,
-        human,
+        human_buffer,
         json.human_parse,
-        cloth,
+        cloth_buffer,
         json.cloth_mask
     );
     if (result.isErr()) {

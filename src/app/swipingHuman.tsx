@@ -35,13 +35,13 @@ export const SwipingHuman = ({}: SwipingHumanProps) => {
         
         // Human Parser and Openpose
         const { openposeImage, openposeImageFormat, openposeLabel, humanParserImage, humanParserImageFormat } = await swipeHuman(swiping)
-            
+
         if (openposeImage != null && openposeImageFormat != null && openposeLabel != null) {
             setLocalStorage(openpose.id, { image: openposeImage, format: openposeImageFormat, label: openposeLabel })
             setOpenpose({...openpose})
         } else {
             removeLocalStorage(openpose.id)
-            setOpenpose({...openpose})                
+            setOpenpose({...openpose})
         }
         
         if (humanParserImage != null && humanParserImageFormat != null) {            
